@@ -45,9 +45,7 @@ public class Config {
     private String addressToBind = "0.0.0.0";
     private int maxConnections = 100;
     /** Read only. */
-    private final String mobileSiteURL = "mobile.mybustracker.co.uk";
-    /** Read only. */
-    private final String wwwSiteURL = "www.mybustracker.co.uk";
+    private static final String WWW_SITE_URL = "http://www.mybustracker.co.uk/";
 
     /**
      * Construct and initialise the configuration. This is not a publically
@@ -178,20 +176,11 @@ public class Config {
     }
 
     /**
-     * Get the URL of the bus tracker mobile website.
-     *
-     * @return The URL of the bus tracker mobile website.
-     */
-    public String getMobileSiteURL() {
-        return mobileSiteURL;
-    }
-
-    /**
      * Get the URL of the main bus tracker website.
      *
      * @return The URL of the main bus tracker website.
      */
     public String getMainWebsiteURL() {
-        return wwwSiteURL;
+        return WWW_SITE_URL;
     }
 }
