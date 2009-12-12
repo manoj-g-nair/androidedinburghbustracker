@@ -49,7 +49,7 @@ public final class Main {
      * The constructor is intentionally empty as this class should not be
      * initialised.
      */
-    public Main() {
+    private Main() {
 
     }
 
@@ -118,5 +118,4 @@ public final class Main {
     public final static String getVersion() {
         return VERSIONMAJOR + "." + VERSIONMINOR + "." + VERSIONREVISION;
     }
-
 }

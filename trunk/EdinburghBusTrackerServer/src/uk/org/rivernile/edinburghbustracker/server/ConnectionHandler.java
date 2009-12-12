@@ -25,12 +25,21 @@
 
 package uk.org.rivernile.edinburghbustracker.server;
 
+import uk.org.rivernile.edinburghbustracker.server.livedata.LiveBusStopData;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.Socket;
-import java.net.UnknownHostException;
+import java.net.URL;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.XMLReaderFactory;
 
 /**
  * The ConnectionHandler class deals with the individual client connections to
@@ -40,12 +49,10 @@ import java.net.UnknownHostException;
  */
 public class ConnectionHandler implements Runnable {
 
-    private final static String httpAgent = "BusTrackerServer/" +
-            Main.getVersion();
-    private Socket clientSocket, serverSocket;
+    private Socket clientSocket;
     private IncomingSocketHandler socketHandler;
-    private BufferedReader clientIn, serverIn;
-    private PrintWriter clientOut, serverOut;
+    private BufferedReader clientIn;
+    private PrintWriter clientOut;
 
     /**
      * Create a new ConnectionHandler.
@@ -114,56 +121,47 @@ public class ConnectionHandler implements Runnable {
 
     /**
      * This is the handler for when the getBusTimesByStopCode:stopCode message
-     * is received by the server. It contacts the Bus Tracker WAP website to
+     * is received by the server. It contacts the Bus Tracker HTTP website to
      * retrieve the data for that stop and transforms that data in to JSON
      * representation and replies to the client.
      *
      * @param stopCode The stop code argument supplied in the call from the
      * client.
      */
-    public void getBusTimesByStopCode(final String stopCode) {
+    private void getBusTimesByStopCode(final String stopCode) {
         if(stopCode == null) throw new IllegalArgumentException("The stop " +
                 "code must not be null.");
         if(stopCode.length() == 0) throw new IllegalArgumentException("The " +
                 "length of the stop code must not be 0.");
+
         try {
-            serverSocket = new Socket(Config.getConfig().getMobileSiteURL(),
-                    80);
-            serverIn = new BufferedReader(new InputStreamReader(
-                    serverSocket.getInputStream()));
-            serverOut = new PrintWriter(serverSocket.getOutputStream(), true);
-            String postString = "busStopCodeQuick=" + stopCode +
-                    "&Navig=ResultStop1";
-            //postString = URLEncoder.encode(postString.trim(), "UTF-8");
-            serverOut.printf("POST /wap.php HTTP/1.1\r\n");
-            serverOut.printf("Host: %s\r\n", Config.getConfig()
-                    .getMobileSiteURL());
-            serverOut.printf("User-Agent: %s\r\n", httpAgent);
-            serverOut.printf("Content-Type: application/x-www-form-urlencoded" +
-                    "\r\n");
-            serverOut.printf("Content-Length: %d\r\n\r\n", postString.length());
-            serverOut.printf("%s\r\n", postString);
-            String line;
-            while((line = serverIn.readLine()) != null) {
-                if(line.startsWith("Incorrect input")) {
-                    clientOut.println("Error: invalid bus stop code.");
-                }
-                if(line.trim().length() != 0) {
-                    System.out.println(line);
-                }
-            }
-            serverIn.close();
-            serverOut.close();
-            serverSocket.close();
-            serverIn = null;
-            serverOut = null;
-            serverSocket = null;
-        } catch(UnknownHostException e) {
-            System.err.println("The system was unable to resolve the " +
-                    "hostname of the mobile bus tracker website.");
+            URL url = new URL(Config.getConfig().getMainWebsiteURL() +
+                    "getBusStopDepartures.php?refreshCount=0&clientType=" +
+                    "b&busStopCode=" + stopCode + "&busStopDay=0&" +
+                    "busStopService=0&numberOfPassage=4&busStopTime=&" +
+                    "busStopDestination=0");
+            HttpURLConnection connection =
+                    (HttpURLConnection)url.openConnection();
+            XMLReader parser = XMLReaderFactory.createXMLReader();
+            ContentHandler busStopData = new LiveBusStopData();
+            parser.setContentHandler(busStopData);
+            InputStream in = connection.getInputStream();
+            InputSource source = new InputSource(in);
+            parser.parse(source);
+            in.close();
+            connection.disconnect();
+            LiveBusStopData blah = (LiveBusStopData)busStopData;
+            blah.test();
+        } catch(MalformedURLException e) {
+            System.err.println("The URL protocol was not recognised.");
         } catch(IOException e) {
-            System.err.println("The socket to the mobile website was closed" +
-                    "unexpectedly.");
+            System.err.println("An IOException occurred during the connection" +
+                    " to the web server. Error:");
+            System.err.println(e.toString());
+        } catch(SAXException e) {
+            System.err.println("An error occurred while trying to initialise " +
+                    "the XML parser.");
+            System.err.println(e.toString());
         }
     }
 }
