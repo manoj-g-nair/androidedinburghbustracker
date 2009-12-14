@@ -150,8 +150,12 @@ public class ConnectionHandler implements Runnable {
             parser.parse(source);
             in.close();
             connection.disconnect();
-            LiveBusStopData blah = (LiveBusStopData)busStopData;
-            blah.test();
+            LiveBusStopData stopData = (LiveBusStopData)busStopData;
+            stopData.test();
+            clientOut.println("+");
+            stopData.writeJSONToStream(clientOut);
+            clientOut.println();
+            clientOut.println("-");
         } catch(MalformedURLException e) {
             System.err.println("The URL protocol was not recognised.");
         } catch(IOException e) {

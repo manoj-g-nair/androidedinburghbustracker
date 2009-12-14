@@ -25,7 +25,10 @@
 
 package uk.org.rivernile.edinburghbustracker.server.livedata;
 
+import java.io.Writer;
 import java.util.ArrayList;
+import org.json.JSONException;
+import org.json.JSONWriter;
 import org.xml.sax.Attributes;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -147,6 +150,7 @@ public class LiveBusStopData extends DefaultHandler {
                     break;
             }
         }
+        thisStopName = thisStopName.trim();
         route = route.trim();
         service.setRoute(route);
     }
@@ -185,6 +189,33 @@ public class LiveBusStopData extends DefaultHandler {
                 if(b.getAccessible()) System.out.print("WHEELCHAIR ");
                 System.out.println(b.getArrivalTime());
             }
+        }
+    }
+    
+    public void writeJSONToStream(final Writer out) {
+        if(out == null) throw new IllegalArgumentException("The Writer object" +
+                " cannot be null.");
+        
+        JSONWriter jw = new JSONWriter(out);
+        try {
+            jw.object().key("stopCode").value(thisStopCode).key("stopName")
+                    .value(thisStopName).key("services").array();
+            for(BusService s : busServices) {
+                jw.object().key("serviceName").value(s.getServiceName())
+                        .key("route").value(s.getRoute()).key("buses").array();
+                for(LiveBus b : s.buses) {
+                    jw.object().key("destination").value(b.getDestination())
+                            .key("arrivalTime").value(b.getArrivalTime())
+                            .key("accessible").value(b.getAccessible())
+                            .endObject();
+                }
+                jw.endArray().endObject();
+            }
+            jw.endArray().endObject();
+        } catch(JSONException e) {
+            System.err.println("A JSON exception has occurred. The exception " +
+                    "reported was:");
+            System.err.println(e.toString());
         }
     }
 }
