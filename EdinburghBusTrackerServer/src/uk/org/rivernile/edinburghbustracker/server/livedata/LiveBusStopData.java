@@ -41,8 +41,8 @@ public class LiveBusStopData extends DefaultHandler {
     private String thisStopCode = "";
     private String thisStopName = "";
     private String route;
-    private boolean stopInformation = false;
-    private boolean busInformation = false;
+    private String str;
+    private boolean span = false;
     private LiveBus bus;
     private BusService service;
 
@@ -64,11 +64,13 @@ public class LiveBusStopData extends DefaultHandler {
     public void startElement(String uri, String localName, String qname,
             Attributes attributes) {
         if(localName.toLowerCase().equals("a")) {
-            stopInformation = true;
+            str = "";
         } else if(localName.toLowerCase().equals("pre")) {
-            busInformation = true;
+            bus = new LiveBus();
+            str = "";
         } else if(localName.toLowerCase().equals("span")) {
             if(bus != null) bus.setAccessible(true);
+            span = true;
         }
     }
 
@@ -78,9 +80,11 @@ public class LiveBusStopData extends DefaultHandler {
     @Override
     public void endElement(String uri, String localName, String qName) {
         if(localName.toLowerCase().equals("a")) {
-            stopInformation = false;
+            handleStopInformation(str);
         } else if(localName.toLowerCase().equals("pre")) {
-            busInformation = false;
+            handleBusInformation(str);
+        } else if(localName.toLowerCase().equals("span")) {
+            span = false;
         }
     }
 
@@ -89,8 +93,8 @@ public class LiveBusStopData extends DefaultHandler {
      */
     @Override
     public void characters(char[] ch, int start, int length) {
+        if(span) return;
         StringBuffer sb = new StringBuffer();
-        String s;
         for(int i = start; i < start + length; i++) {
             if(ch[i] == ' ' && i > start) {
                 if(ch[i-1] != ' ') {
@@ -100,12 +104,8 @@ public class LiveBusStopData extends DefaultHandler {
                 sb.append(ch[i]);
             }
         }
-        s = sb.toString().trim();
-        if(stopInformation) {
-            handleStopInformation(s);
-        } else if(busInformation) {
-            handleBusInformation(s);
-        }
+
+        str = str + sb.toString();
     }
 
     /**
@@ -158,7 +158,6 @@ public class LiveBusStopData extends DefaultHandler {
      * @param infoLine The string to parse.
      */
     private void handleBusInformation(String infoLine) {
-        bus = new LiveBus();
         String[] splitted = infoLine.split("\\s+");
         if(splitted.length < 3) return;
         service.setServiceName(splitted[0].trim());
