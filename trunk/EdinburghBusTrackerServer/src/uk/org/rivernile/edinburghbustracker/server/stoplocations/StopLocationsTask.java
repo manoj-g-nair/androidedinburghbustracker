@@ -96,7 +96,8 @@ public class StopLocationsTask extends DefaultHandler {
                 doTask();
                 new File(Database.DB_FILE).renameTo(f);
             } else {
-                if(f.lastModified() >= 604800000) {
+                if(System.currentTimeMillis() >=
+                        (f.lastModified() + 604800000)) {
                     doTask();
                     new File(Database.DB_FILE).renameTo(f);
                 }
