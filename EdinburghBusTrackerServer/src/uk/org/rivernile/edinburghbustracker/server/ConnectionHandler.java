@@ -151,7 +151,6 @@ public class ConnectionHandler implements Runnable {
             in.close();
             connection.disconnect();
             LiveBusStopData stopData = (LiveBusStopData)busStopData;
-            stopData.test();
             clientOut.println("+");
             stopData.writeJSONToStream(clientOut);
             clientOut.println();

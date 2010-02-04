@@ -113,6 +113,7 @@ public class JSONObject {
          *  or null.
          */
          @Override
+        @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
         public boolean equals(Object object) {
             return object == null || object == this;
         }

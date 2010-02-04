@@ -64,8 +64,8 @@ public class LiveBusStopData extends DefaultHandler {
      * {@inheritDoc}
      */
     @Override
-    public void startElement(String uri, String localName, String qname,
-            Attributes attributes) {
+    public void startElement(final String uri, final String localName,
+            final String qname, final Attributes attributes) {
         if(localName.toLowerCase().equals("a")) {
             str = "";
         } else if(localName.toLowerCase().equals("pre")) {
@@ -81,7 +81,9 @@ public class LiveBusStopData extends DefaultHandler {
      * {@inheritDoc}
      */
     @Override
-    public void endElement(String uri, String localName, String qName) {
+    public void endElement(final String uri, final String localName,
+            final String qName)
+    {
         if(localName.toLowerCase().equals("a")) {
             handleStopInformation(str);
         } else if(localName.toLowerCase().equals("pre")) {
@@ -95,7 +97,7 @@ public class LiveBusStopData extends DefaultHandler {
      * {@inheritDoc}
      */
     @Override
-    public void characters(char[] ch, int start, int length) {
+    public void characters(final char[] ch, final int start, final int length) {
         if(span) return;
         StringBuffer sb = new StringBuffer();
         for(int i = start; i < start + length; i++) {
@@ -116,7 +118,7 @@ public class LiveBusStopData extends DefaultHandler {
      *
      * @param infoLine The string to parse.
      */
-    private void handleStopInformation(String infoLine) {
+    private void handleStopInformation(final String infoLine) {
         char[] chars = infoLine.toCharArray();
         int stage = 0;
 
@@ -161,7 +163,7 @@ public class LiveBusStopData extends DefaultHandler {
      *
      * @param infoLine The string to parse.
      */
-    private void handleBusInformation(String infoLine) {
+    private void handleBusInformation(final String infoLine) {
         String[] splitted = infoLine.split("\\s+");
         if(splitted.length < 3) return;
         service.setServiceName(splitted[0].trim());
@@ -178,20 +180,12 @@ public class LiveBusStopData extends DefaultHandler {
         service.addLiveBus(bus);
     }
 
-    public void test() {
-        System.out.println("Stop Code: " + thisStopCode);
-        System.out.println("Stop Name: " + thisStopName);
-        for(BusService s : busServices) {
-            System.out.println(s.getServiceName() + " " + s.getRoute());
-            for(LiveBus b : s.buses) {
-                System.out.print(s.getServiceName() + " " +
-                        b.getDestination() + " ");
-                if(b.getAccessible()) System.out.print("WHEELCHAIR ");
-                System.out.println(b.getArrivalTime());
-            }
-        }
-    }
-    
+    /**
+     * Get all of the bus stop information available in this object and output
+     * it in JSON format to the supplied Writer stream.
+     *
+     * @param out The stream to write the JSON text to.
+     */
     public void writeJSONToStream(final Writer out) {
         if(out == null) throw new IllegalArgumentException("The Writer object" +
                 " cannot be null.");

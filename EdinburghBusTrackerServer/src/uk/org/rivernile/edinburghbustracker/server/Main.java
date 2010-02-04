@@ -25,6 +25,9 @@
 
 package uk.org.rivernile.edinburghbustracker.server;
 
+import uk.org.rivernile.edinburghbustracker.server.stoplocations
+        .StopLocationsTask;
+
 /**
  * This is the main class of the application, which contains the entry point in
  * to the application and also the version details of the application.
@@ -90,6 +93,7 @@ public final class Main {
      */
     public static void start() {
         Config.initConfig(configFile);
+        new StopLocationsTask(Config.getConfig().getDBPath());
         IncomingSocketHandler socketHandler = new IncomingSocketHandler();
         socketHandler.run();
         System.out.println("The server is now exiting.");
