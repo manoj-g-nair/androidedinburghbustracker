@@ -91,10 +91,6 @@ public class Config {
                 } else if(keyValue[0].trim().toLowerCase().equals(
                         "bindaddress")) {
                     addressToBind = keyValue[1].trim();
-                    addressToBind = addressToBind.replace('/',
-                            File.pathSeparatorChar);
-                    addressToBind = addressToBind.replace('\\',
-                            File.pathSeparatorChar);
                 } else if(keyValue[0].trim().toLowerCase().equals(
                         "maxconnections")) {
                     int tmp = Integer.parseInt(keyValue[1].trim());
@@ -102,6 +98,9 @@ public class Config {
                             + "connections must not be less than 0.");
                 } else if(keyValue[0].trim().toLowerCase().equals("dbpath")) {
                     dbPath = keyValue[1].trim();
+                    dbPath = addressToBind.replace('/', File.pathSeparatorChar);
+                    dbPath = addressToBind.replace('\\',
+                            File.pathSeparatorChar);
                 } else {
                     System.err.println("Invalid config key \"" + keyValue[0] +
                             "\".");
