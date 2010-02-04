@@ -27,6 +27,7 @@ package uk.org.rivernile.edinburghbustracker.server;
 
 import java.io.FileReader;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -39,11 +40,12 @@ import java.io.IOException;
  */
 public class Config {
 
-    private static Config config;
+    private static Config config = null;
 
     private int portNumber = 4876;
     private String addressToBind = "0.0.0.0";
     private int maxConnections = 100;
+    private String dbPath = "./";
     /** Read only. */
     private static final String WWW_SITE_URL = "http://www.mybustracker.co.uk/";
 
@@ -89,11 +91,17 @@ public class Config {
                 } else if(keyValue[0].trim().toLowerCase().equals(
                         "bindaddress")) {
                     addressToBind = keyValue[1].trim();
+                    addressToBind = addressToBind.replace('/',
+                            File.pathSeparatorChar);
+                    addressToBind = addressToBind.replace('\\',
+                            File.pathSeparatorChar);
                 } else if(keyValue[0].trim().toLowerCase().equals(
                         "maxconnections")) {
                     int tmp = Integer.parseInt(keyValue[1].trim());
                     if(tmp < 0) System.err.println("The maximum number of "
                             + "connections must not be less than 0.");
+                } else if(keyValue[0].trim().toLowerCase().equals("dbpath")) {
+                    dbPath = keyValue[1].trim();
                 } else {
                     System.err.println("Invalid config key \"" + keyValue[0] +
                             "\".");
@@ -125,12 +133,8 @@ public class Config {
      * @return An instance of the config manager.
      */
     public static Config initConfig(final String configFile) {
-        if(config == null) {
-            config = new Config(configFile);
-            return config;
-        } else {
-            return config;
-        }
+        if(config == null) config = new Config(configFile);
+        return config;
     }
 
     /**
@@ -140,12 +144,8 @@ public class Config {
      * @return An instance of the config manager.
      */
     public static Config getConfig() {
-        if(config == null) {
-            config = new Config();
+        if(config == null) config = new Config();
             return config;
-        } else {
-            return config;
-        }
     }
 
     /**
@@ -182,5 +182,16 @@ public class Config {
      */
     public String getMainWebsiteURL() {
         return WWW_SITE_URL;
+    }
+
+    /**
+     * Get the directory path where the bus stop location database should be
+     * put after being created.
+     *
+     * @return The directory path of where the bus stop location database should
+     * be put.
+     */
+    public String getDBPath() {
+        return dbPath;
     }
 }
