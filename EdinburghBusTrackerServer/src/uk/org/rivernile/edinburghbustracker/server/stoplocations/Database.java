@@ -71,7 +71,7 @@ public class Database {
         stmt.executeUpdate("DROP TABLE IF EXISTS " + TABLE_SERVICES + ";");
         stmt.executeUpdate("DROP TABLE IF EXISTS " + TABLE_METADATA + ";");
         stmt.executeUpdate("CREATE TABLE " + TABLE_STOPS + " (_id TEXT " +
-                "PRIMARY KEY, stopName TEXT, x TEXT, y TEXT);");
+                "PRIMARY KEY, stopName TEXT, x INTEGER, y INTEGER);");
         stmt.executeUpdate("CREATE TABLE " + TABLE_SERVICES + " (_id INTEGER " +
                 "PRIMARY KEY AUTOINCREMENT, stopCode TEXT, serviceName TEXT);");
         stmt.executeUpdate("CREATE TABLE " + TABLE_METADATA + " (_id INTEGER " +
@@ -109,7 +109,7 @@ public class Database {
      * SQLite database.
      */
     public void insertStop(final String stopCode, final String stopName,
-            final String x, final String y) throws SQLException
+            final int x, final int y) throws SQLException
     {
         if(stopCode == null || stopCode.length() < 1)
             throw new IllegalArgumentException("The stopCode parameter must " +
@@ -117,16 +117,11 @@ public class Database {
         if(stopName == null || stopName.length() < 1)
             throw new IllegalArgumentException("The stopName parameter must " +
                     "not be null or blank");
-        if(x == null || x.length() < 1)
-            throw new IllegalArgumentException("The x parameter must not be " +
-                    "null or blank.");
-        if(y == null || y.length() < 1)
-            throw new IllegalArgumentException("The y parameter must not be " +
-                    "null or blank.");
+
         insrtStops.setString(1, stopCode);
         insrtStops.setString(2, stopName);
-        insrtStops.setString(3, x);
-        insrtStops.setString(4, y);
+        insrtStops.setInt(3, x);
+        insrtStops.setInt(4, y);
         insrtStops.addBatch();
     }
 
