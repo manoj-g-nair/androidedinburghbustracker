@@ -54,8 +54,8 @@ public class StopLocationsTask extends DefaultHandler {
     private String dbPath;
     private String currStopCode;
     private String currStopName;
-    private String currX;
-    private String currY;
+    private int currX;
+    private int currY;
     private String currServiceName, loopServiceName;
     private boolean onStopCode = false, onStopName = false, onX = false,
             onY = false, onServiceName = false, ignoreRest = false;
@@ -91,15 +91,16 @@ public class StopLocationsTask extends DefaultHandler {
     private Runnable task = new Runnable() {
         @Override
         public void run() {
-            File f = new File(dbPath + Database.DB_FILE);
-            if(!f.exists()) {
+            File dest = new File(dbPath + Database.DB_FILE);
+            File orig = new File(Database.DB_FILE);
+            if(!dest.exists()) {
                 doTask();
-                new File(Database.DB_FILE).renameTo(f);
+                if(!orig.equals(dest)) orig.renameTo(dest);
             } else {
                 if(System.currentTimeMillis() >=
-                        (f.lastModified() + 604800000)) {
+                        (dest.lastModified() + 604800000)) {
                     doTask();
-                    new File(Database.DB_FILE).renameTo(f);
+                    if(!orig.equals(dest)) orig.renameTo(dest);
                 }
             }
         }
@@ -110,10 +111,10 @@ public class StopLocationsTask extends DefaultHandler {
         public void run() {
             File orig = new File(Database.DB_FILE);
             File dest = new File(dbPath + Database.DB_FILE);
-            if(orig.exists()) orig.delete();
             doTask();
-            if(dest.exists()) dest.delete();
-            orig.renameTo(dest);
+            if(!orig.equals(dest)) {
+                orig.renameTo(dest);
+            }
         }
     };
 
@@ -266,9 +267,11 @@ public class StopLocationsTask extends DefaultHandler {
         } else if(onStopName) {
             currStopName = charactersToString(ch, start, length);
         } else if(onX) {
-            currX = charactersToString(ch, start, length);
+            currX = degreesToMicroDegrees(
+                    charactersToString(ch, start, length));
         } else if(onY) {
-            currY = charactersToString(ch, start, length);
+            currY = degreesToMicroDegrees(
+                    charactersToString(ch, start, length));
         } else if(onServiceName) {
             currServiceName = charactersToString(ch, start, length);
         }
@@ -285,5 +288,44 @@ public class StopLocationsTask extends DefaultHandler {
             sb.append(ch[i]);
         }
         return sb.toString().trim();
+    }
+
+    /**
+     * On the Android clients, a GeoPoint is represented as an integer with a
+     * precision of one millionth. Therefore, we want to elimiate the decimal
+     * point and only have the first 6 digits after the decimal point.
+     *
+     * @param degrees The floating point representation of a coordinate.
+     * @return The integer representation of a coordinate.
+     */
+    private static int degreesToMicroDegrees(final String degrees) {
+        if(degrees == null || degrees.length() < 1)
+            throw new IllegalArgumentException("The degrees argument must " +
+                    "not be null or blank.");
+        String[] splitted = degrees.split("\\.");
+        if(splitted.length < 2) {
+            try {
+                return Integer.parseInt(degrees);
+            } catch(NumberFormatException e) {
+                System.err.println("Exception while converting degrees to " +
+                        "microdegrees.");
+                System.err.println(e.toString());
+            }
+            return Integer.MAX_VALUE;
+        }
+
+        try {
+            if(splitted[1].length() > 6) {
+                return Integer.parseInt(splitted[0] +
+                        splitted[1].substring(0, 6));
+            } else {
+                return Integer.parseInt(splitted[0] + splitted[1]);
+            }
+        } catch(NumberFormatException e) {
+            System.err.println("Exception while converting degrees to " +
+                    "microdegrees.");
+            System.err.println(e.toString());
+        }
+        return Integer.MAX_VALUE;
     }
 }
