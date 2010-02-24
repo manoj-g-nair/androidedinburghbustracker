@@ -85,7 +85,7 @@ public class StopLocationsTask extends DefaultHandler {
         date.set(Calendar.MINUTE, 0);
         date.set(Calendar.SECOND, 0);
         date.set(Calendar.MILLISECOND, 0);
-        timer.schedule(tt, date.getTime(), 604800000);
+        timer.scheduleAtFixedRate(tt, date.getTime(), 604800000);
     }
 
     private Runnable task = new Runnable() {
@@ -111,10 +111,12 @@ public class StopLocationsTask extends DefaultHandler {
         public void run() {
             File orig = new File(Database.DB_FILE);
             File dest = new File(dbPath + Database.DB_FILE);
+            System.out.println("Commencing weekly stop DB creation.");
             doTask();
             if(!orig.equals(dest)) {
                 orig.renameTo(dest);
             }
+            System.out.println("Weekly stop DB creation complete.");
         }
     };
 
@@ -122,6 +124,7 @@ public class StopLocationsTask extends DefaultHandler {
      * The database fecthing task.
      */
     private void doTask() {
+        System.out.println("Starting to create stops DB.");
         services = new LinkedList<String>();
         stops = new LinkedList<String>();
         loopServiceName = "1";

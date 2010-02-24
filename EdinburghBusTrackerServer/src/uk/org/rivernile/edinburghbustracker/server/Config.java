@@ -46,6 +46,7 @@ public class Config {
     private String addressToBind = "0.0.0.0";
     private int maxConnections = 100;
     private String dbPath = "./";
+    private String dbURL = "http://localhost/busstops.db";
     /** Read only. */
     private static final String WWW_SITE_URL = "http://www.mybustracker.co.uk/";
 
@@ -98,9 +99,11 @@ public class Config {
                             + "connections must not be less than 0.");
                 } else if(keyValue[0].trim().toLowerCase().equals("dbpath")) {
                     dbPath = keyValue[1].trim();
-                    dbPath = addressToBind.replace('/', File.pathSeparatorChar);
-                    dbPath = addressToBind.replace('\\',
-                            File.pathSeparatorChar);
+                    //dbPath = addressToBind.replace('/', File.pathSeparatorChar);
+                    //dbPath = addressToBind.replace('\\',
+                            //File.pathSeparatorChar);
+                } else if(keyValue[1].trim().toLowerCase().equals("dbURL")) {
+                    dbURL = keyValue[1].trim();
                 } else {
                     System.err.println("Invalid config key \"" + keyValue[0] +
                             "\".");
@@ -192,5 +195,14 @@ public class Config {
      */
     public String getDBPath() {
         return dbPath;
+    }
+
+    /**
+     * Get the URL of the stop database.
+     *
+     * @return The URL of the stop database.
+     */
+    public String getDBURL() {
+        return dbURL;
     }
 }
