@@ -25,6 +25,9 @@
 
 package uk.org.rivernile.edinburghbustracker.server.stoplocations;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -42,6 +45,7 @@ import java.sql.Statement;
 public class Database {
 
     public static final String DB_FILE = "busstops.db";
+    public static final String LAST_MOD_FILE = "dblastmod";
     private static final String TABLE_STOPS = "bus_stops";
     private static final String TABLE_SERVICES = "service_stops";
     private static final String TABLE_METADATA = "metadata";
@@ -158,9 +162,18 @@ public class Database {
     public void finished() throws SQLException{
         insrtStops.executeBatch();
         insrtServices.executeBatch();
+        long currentTS = System.currentTimeMillis();
         stmt.executeUpdate("INSERT INTO " + TABLE_METADATA + " (updateTS) " +
-                "VALUES (\"" + System.currentTimeMillis() + "\");");
+                "VALUES (\"" + currentTS + "\");");
         con.commit();
+        try {
+            BufferedWriter out = new BufferedWriter(
+                    new FileWriter(LAST_MOD_FILE));
+            out.write("" + currentTS);
+            out.close();
+        } catch(IOException e) {
+            // Do nothing.
+        }
         try {
             db = null;
             con.close();

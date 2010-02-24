@@ -27,6 +27,8 @@ package uk.org.rivernile.edinburghbustracker.server;
 
 import uk.org.rivernile.edinburghbustracker.server.livedata.LiveBusStopData;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -40,6 +42,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
+import uk.org.rivernile.edinburghbustracker.server.stoplocations.Database;
 
 /**
  * The ConnectionHandler class deals with the individual client connections to
@@ -103,6 +106,26 @@ public class ConnectionHandler implements Runnable {
                     } else {
                         getBusTimesByStopCode(splitted[1]);
                     }
+                } else if(splitted[0].equals("getDBURL")) {
+                    clientOut.println(Config.getConfig().getDBURL());
+                } else if(splitted[0].equals("getDBLastModTime")) {
+                    File f = new File(Database.LAST_MOD_FILE);
+                    if(!f.exists() || f.length() == 0L) {
+                        clientOut.println("0");
+                        continue;
+                    }
+                    BufferedReader in = new BufferedReader(new FileReader(f));
+                    clientOut.println(in.readLine());
+                    in.close();
+                } else if(splitted[0].equals("getLatestAndroidClientVersion")) {
+                    File f = new File("latest.android");
+                    if(!f.exists() || f.length() == 0L) {
+                        clientOut.println("Unknown");
+                        continue;
+                    }
+                    BufferedReader in = new BufferedReader(new FileReader(f));
+                    clientOut.println(in.readLine());
+                    in.close();
                 } else if(splitted[0].equals("exit")) {
                     clientSocket.close();
                     break;
