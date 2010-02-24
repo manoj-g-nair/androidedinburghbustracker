@@ -38,9 +38,11 @@ This format is used for simplicity and the config for the server is not hugely c
 This is a listing of all possible configuration options for the server;
 
 || *Key Name* || *Data type* || *Valid values* || *Default value* || *Function* ||
-|| portnumber || Integer || 1 - 65535 || 4876 || The local port to listen for client connections on. ||
+|| port || Integer || 1 - 65535 || 4876 || The local port to listen for client connections on. ||
 || bindaddress || IP Address || 0.0.0.0 - 255.255.255.255 || 0.0.0.0 || The local interface address to bind to.  0.0.0.0 is the default system interface. ||
 || maxconnections || Integer || 0 - MAXINT || 100 || The maximum number of simultaneous client connections this server can accept. If 0 or a very high number is specified, the server will keep accepting connections until the host system does not allow it to accept any more, ie resource starvation. Setting this value to a sane number is highly recommended if you want a stable server and system. ||
+|| dbpath || String || Any valid absolute or abstract path on the host system || ./ || Specify a web-accessible location where the database should be put after it is generated so that the mobile clients can download this database. "dburl" should be set too. ||
+|| dburl || String || Any valid URL || The full URL, including "http://", to where the mobile clients can download the latest bus stop database. ||
 
 == Default config file ==
 
