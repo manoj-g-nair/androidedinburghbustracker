@@ -27,7 +27,6 @@ package uk.org.rivernile.edinburghbustracker.server;
 
 import java.io.FileReader;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 
 /**
@@ -102,7 +101,7 @@ public class Config {
                     //dbPath = addressToBind.replace('/', File.pathSeparatorChar);
                     //dbPath = addressToBind.replace('\\',
                             //File.pathSeparatorChar);
-                } else if(keyValue[1].trim().toLowerCase().equals("dbURL")) {
+                } else if(keyValue[1].trim().toLowerCase().equals("dburl")) {
                     dbURL = keyValue[1].trim();
                 } else {
                     System.err.println("Invalid config key \"" + keyValue[0] +
