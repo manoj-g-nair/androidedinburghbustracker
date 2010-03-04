@@ -84,7 +84,6 @@ public class StopLocationsTask extends DefaultHandler {
         date.set(Calendar.HOUR, 6);
         date.set(Calendar.MINUTE, 0);
         date.set(Calendar.SECOND, 0);
-        date.set(Calendar.MILLISECOND, 0);
         timer.schedule(tt, date.getTime(), 604800000);
     }
 
@@ -95,12 +94,18 @@ public class StopLocationsTask extends DefaultHandler {
             File orig = new File(Database.DB_FILE);
             if(!dest.exists()) {
                 doTask();
-                if(!orig.equals(dest)) orig.renameTo(dest);
+                if(!orig.equals(dest)) {
+                    dest.delete();
+                    orig.renameTo(dest);
+                }
             } else {
                 if(System.currentTimeMillis() >=
                         (dest.lastModified() + 604800000)) {
                     doTask();
-                    if(!orig.equals(dest)) orig.renameTo(dest);
+                    if(!orig.equals(dest)) {
+                        dest.delete();
+                        orig.renameTo(dest);
+                    }
                 }
             }
         }
