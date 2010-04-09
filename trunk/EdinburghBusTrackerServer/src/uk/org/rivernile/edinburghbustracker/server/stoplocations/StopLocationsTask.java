@@ -84,6 +84,8 @@ public class StopLocationsTask extends DefaultHandler {
         date.set(Calendar.HOUR, 6);
         date.set(Calendar.MINUTE, 0);
         date.set(Calendar.SECOND, 0);
+        date.set(Calendar.AM_PM, Calendar.AM);
+        date.add(Calendar.WEEK_OF_YEAR, 1);
         timer.schedule(tt, date.getTime(), 604800000);
     }
 
