@@ -1,0 +1,7 @@
+#summary This document lists changes made to the Android application between releases.
+#labels Featured,ChangeLog
+
+= ChangeLog for the Android client application =
+
+=== 0.0.1 ===
+Initial release.
