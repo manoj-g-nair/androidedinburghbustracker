@@ -3,5 +3,14 @@
 
 = ChangeLog for the Android client application =
 
+=== 0.0.2 ===
+  * DisplayStopDataActivity has now been rewritten so that it behaves correctly when the device has been rotated.
+  * DisplayStopDataActivity will no longer randomly crash while auto-refreshing.
+  * The dialog displayed when viewing a bus stop in BusStopMapActivity now lets you add and remove that stop from the favourites database.
+  * Fixed an issue where the application would crash upon start up if the database is corrupt - Thanks Nick Forsyth.
+  * Various other minor bug fixes.
+  * Some code commenting.
+
+
 === 0.0.1 ===
 Initial release.
