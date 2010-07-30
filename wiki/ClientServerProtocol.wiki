@@ -27,7 +27,7 @@ The server deals with each client in a separate thread which does not spawn any 
 || getBusTimesByStopCode || The stop code || + <crlf> JSON text <crlf> - || Get the live data for a bus stop. ||
 || getDBURL || none || Bus stop database URL || Get the URL to the bus stop database for client updating. ||
 || getDBLastModTime || none || Database last modification time. || Get the timestamp (milliseconds since the EPOCH) of when the database was last generated. ||
-|| getLatestAndroidClientVersion || none || Latest Android client version. || Get the latest Android client version available. ||
+|| getLatestAndroidClientVersion || none || Latest Android client version. || Get the latest Android client version available. Deprecated. ||
 || exit || none || nothing || Closes the client's connection to the server. ||
 
 == Example ==
@@ -37,7 +37,7 @@ An example session showing the commands issued by a client.
 {{{
 getDBLastModTime
 getDBURL
-getLatestAndroidClientVersion
+getLatestAndroidClientVersion /* Deprecated */
 getBusTimesByStopCode:36232658
 exit
 }}}
