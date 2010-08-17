@@ -3,6 +3,13 @@
 
 = ChangeLog for the Android client application =
 
+=== 0.0.3 ===
+  * The user can now backup and restore their favourite bus stops from the Preferences section of the application. This will save a copy of the favourites database to the SD card and when the user wishes to restore the database, this same file will be used.
+  * The user can now sort the bus services in order of time (with the first to arrive being the first in the list). The default ordering, in order of service name, can still be selected and will remain the default ordering. If the user wishes to order by time, they can enable it from the Preferences or in the menu when displaying bus times. Their selection will be remembered for subsequent views of departure times.
+  * The display of departure times has now been rewritten to reflect a cleaner way of displaying bus times. All bus services will be unexpanded but will show the service number, it's destination and the arrival time for the next bus in that service. If the user wishes to view subsequent departures, they can do so by expanding the list for that bus service.
+  * Fixed an issue which prevented the application being displayed in the Android Market by QVGA devices (HTC Tattoo, HTC Wildfire, ...). The application is now compiled for Android 2.1 rather than 1.5, and now contains QVGA compatible graphics to support lower resolution devices. At the same time, higher resolution images were added to support WVGA. Thanks to all who reported this issue.
+
+
 === 0.0.2 ===
   * DisplayStopDataActivity has now been rewritten so that it behaves correctly when the device has been rotated.
   * DisplayStopDataActivity will no longer randomly crash while auto-refreshing.
