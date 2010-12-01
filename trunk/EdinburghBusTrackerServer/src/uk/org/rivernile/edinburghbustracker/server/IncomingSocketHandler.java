@@ -84,6 +84,7 @@ public class IncomingSocketHandler {
         while(keepRunning) {
             try {
                 socket = listenSocket.accept();
+                socket.setSoTimeout(120000);
                 synchronized(listLock) {
                     listSize = connectionList.size();
                 }

@@ -133,13 +133,18 @@ public class ConnectionHandler implements Runnable {
                     clientOut.println("Error: unknown server command.");
                 }
             }
-            clientIn.close();
-            clientOut.close();
-            clientSocket.close();
         } catch(IOException e) {
             // The clientSocket has probably been closed.
+        } finally {
+            try {
+                clientIn.close();
+                clientOut.close();
+                clientSocket.close();
+            } catch(IOException e) {
+                // Assume the socket is already closed.
+            }
+            socketHandler.removeConnection(this);
         }
-        socketHandler.removeConnection(this);
     }
 
     /**
