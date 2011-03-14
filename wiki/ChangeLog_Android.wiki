@@ -3,6 +3,20 @@
 
 = ChangeLog for the Android client application =
 
+=== 0.0.4 ===
+  * Added the ability to get the latest news and travel updates within the application. This grabs the feeds from a Twitter list. This can be accessed from the main screen, then press the menu key on the device, then select 'News and Updates'. This data can be refreshed from the menu.
+  * Increased the padding on the expandable list where the bus stop times are shown to improve the look of the cells.
+  * Moved the 'About' screen from an Activity to a Dialog. It is now more pleasing to the eye and is laid out better.
+  * Rewrote the map activity. It now no longer crashes when attempting to draw the user's location on the map (this was solved by working around a bug in the Google Maps API). The map activity now no longer crashes when the user rotates the device when the bus stop dialog is open.
+  * Added the ability to search for locations on the map. The user can search for places and bus stops. Geocoding is used to search for places and the database is searched for bus stops. The Google search framework is used to make this process as native as possible, and also gives the added benefit of allowing voice recognition search terms. Search results are shown in the order of distance from the detected device location. This can be accessed by pressing the device's search key if it has one, or by pressing the menu key then 'Search' in the map activity.
+  * Fixed an issue where the user would be shown the times for the wrong bus stop, or not shown times at all if they try to load the times for two or more stops at the same time. For example, the user may flick through stops in their favourites list, select stop A followed by stop B and be shown the times or stop A, or no times at all.
+  * Made better use of the <uses-feature> tags in AndroidManifest.xml to allow the application to be shown to a wider range of devices in the Android Market.
+  * When the application starts, if an older version of the database is in use than what is bundled with the application, the application will bring this database up to the bundled version. This means that the stop database will always be compatible with the latest versions of the application and the user will not have a very old version of the database loaded.
+  * Added the ability, from the application preferences, for the user to force check for bus stop database updates. This disregards the stop database update setting. If an update is found, a new version of the database is downloaded. This does not affect the application's ability to automatically update the database periodically.
+  * The user can now hit the enter key after typing in a stop code to submit that code, rather than having to close the keyboard to find the submit button.
+  * General house keeping.
+
+
 === 0.0.3 ===
   * The user can now backup and restore their favourite bus stops from the Preferences section of the application. This will save a copy of the favourites database to the SD card and when the user wishes to restore the database, this same file will be used.
   * The user can now sort the bus services in order of time (with the first to arrive being the first in the list). The default ordering, in order of service name, can still be selected and will remain the default ordering. If the user wishes to order by time, they can enable it from the Preferences or in the menu when displaying bus times. Their selection will be remembered for subsequent views of departure times.
