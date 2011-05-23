@@ -37,11 +37,11 @@ import uk.org.rivernile.edinburghbustracker.server.stoplocations
 public final class Main {
 
     /** Major release number of application */
-    public final static int VERSIONMAJOR = 0;
+    public final static int VERSIONMAJOR = 1;
     /** Minor release number of application */
     public final static int VERSIONMINOR = 0;
     /** Release revision of application */
-    public final static int VERSIONREVISION = 1;
+    public final static int VERSIONREVISION = 2;
     /** The title of the application */
     public final static String APPLICATIONTITLE = "Edinburgh Bus Tracker for " +
             "Android Server";

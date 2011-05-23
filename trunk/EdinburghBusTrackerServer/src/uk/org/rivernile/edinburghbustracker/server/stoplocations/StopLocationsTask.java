@@ -81,7 +81,7 @@ public class StopLocationsTask extends DefaultHandler {
         timer = new Timer();
         Calendar date = Calendar.getInstance();
         date.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
-        date.set(Calendar.HOUR, 6);
+        date.set(Calendar.HOUR, 10);
         date.set(Calendar.MINUTE, 0);
         date.set(Calendar.SECOND, 0);
         date.set(Calendar.AM_PM, Calendar.AM);
@@ -168,7 +168,7 @@ public class StopLocationsTask extends DefaultHandler {
         while(i < services.size()) {
             loopServiceName = services.get(i);
             try {
-                url = new URL("http://www.mybustracker.co.uk/" +
+                url = new URL("http://old.mybustracker.co.uk/" +
                         "getServicePoints.php?serviceMnemo=" + services.get(i));
                 con = (HttpURLConnection)url.openConnection();
                 in = con.getInputStream();
