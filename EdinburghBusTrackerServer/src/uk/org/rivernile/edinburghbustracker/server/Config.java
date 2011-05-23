@@ -47,7 +47,7 @@ public class Config {
     private String dbPath = "./";
     private String dbURL = "http://localhost/busstops.db";
     /** Read only. */
-    private static final String WWW_SITE_URL = "http://www.mybustracker.co.uk/";
+    private static final String WWW_SITE_URL = "http://old.mybustracker.co.uk/";
 
     /**
      * Construct and initialise the configuration. This is not a publically
