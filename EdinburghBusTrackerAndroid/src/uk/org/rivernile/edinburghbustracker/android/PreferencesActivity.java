@@ -32,7 +32,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.preference.EditTextPreference;
 import android.preference.PreferenceActivity;
-import android.provider.SearchRecentSuggestions;
 import android.widget.Toast;
 import java.io.File;
 
@@ -67,11 +66,6 @@ public class PreferencesActivity extends PreferenceActivity
                 findPreference("pref_backup_favourites");
         GenericDialogPreference restoreDialog = (GenericDialogPreference)
                 findPreference("pref_restore_favourites");
-        GenericDialogPreference clearSearchHistoryDialog =
-                (GenericDialogPreference)findPreference(
-                "pref_clear_search_history");
-        GenericDialogPreference checkStopDBUpdates =
-                (GenericDialogPreference)findPreference("pref_update_stop_db");
 
         backupDialog.setOnClickListener(new DialogInterface.OnClickListener() {
             @Override
@@ -118,41 +112,6 @@ public class PreferencesActivity extends PreferenceActivity
                     Toast.makeText(getApplicationContext(), message,
                             Toast.LENGTH_SHORT).show();
                 }
-            }
-        });
-
-        clearSearchHistoryDialog.setOnClickListener(
-                new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(final DialogInterface dialog, final int which) {
-                if(which != dialog.BUTTON_POSITIVE) {
-                    dialog.dismiss();
-                    return;
-                }
-                SearchRecentSuggestions suggestions =
-                        new SearchRecentSuggestions(PreferencesActivity.this,
-                        MapSearchHistoryProvider.AUTHORITY,
-                        MapSearchHistoryProvider.MODE);
-                suggestions.clearHistory();
-            }
-        });
-
-        checkStopDBUpdates.setOnClickListener(
-                new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(final DialogInterface dialog, final int which) {
-                if(which != dialog.BUTTON_POSITIVE) {
-                    dialog.dismiss();
-                    return;
-                }
-
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        MainActivity.checkForDBUpdates(getApplicationContext(),
-                                true);
-                    }
-                }).start();
             }
         });
     }

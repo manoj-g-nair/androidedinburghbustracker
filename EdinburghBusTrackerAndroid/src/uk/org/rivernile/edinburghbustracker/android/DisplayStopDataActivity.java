@@ -35,23 +35,17 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.view.ContextMenu;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ExpandableListAdapter;
 import android.widget.SimpleExpandableListAdapter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
 import java.util.HashMap;
-import uk.org.rivernile.android.bustracker.parser.livetimes.Bus;
-import uk.org.rivernile.android.bustracker.parser.livetimes.BusService;
-import uk.org.rivernile.android.bustracker.parser.livetimes.BusStop;
-import uk.org.rivernile.android.bustracker.parser.livetimes.BusTimes;
-import uk.org.rivernile.edinburghbustracker.android.livetimes.parser.EdinburghBus;
-import uk.org.rivernile.edinburghbustracker.android.livetimes.parser.EdinburghBusStop;
-import uk.org.rivernile.edinburghbustracker.android.livetimes.parser
-        .EdinburghParser;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class DisplayStopDataActivity extends ExpandableListActivity {
 
@@ -61,10 +55,6 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
     public final static int ERROR_NOCODE = 3;
     public final static int ERROR_PARSEERR = 4;
     public final static int ERROR_NODATA = 5;
-        
-    public final static int EVENT_READY = 0;
-    public final static int EVENT_ERROR = 1;
-    public final static int EVENT_REFRESH = 2;
 
     private final static int FAVOURITE_ID = Menu.FIRST;
     private final static int SORT_ID = Menu.FIRST + 1;
@@ -85,10 +75,15 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
 
     private String stopCode;
     private String stopName;
+    private String remoteHost;
+    private String jsonString;
+    private int remotePort;
     private boolean autoRefresh;
+    private boolean favouriteExists;
+    private boolean showNightBuses;
     private boolean progressDialogShown = false;
     private SharedPreferences sp;
-    private BusTimes busTimes;
+    private FetchLiveTimesTask fetchTask;
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
@@ -96,41 +91,52 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
         setContentView(R.layout.displaystopdata);
         setTitle(R.string.displaystopdata_title);
 
-        busTimes = BusTimes.getInstance(mHandler,
-                EdinburghParser.getInstance());
+        fetchTask = FetchLiveTimesTask.getInstance(mHandler);
         sp = getSharedPreferences(PreferencesActivity.PREF_FILE, 0);
+
+        remoteHost = sp.getString(PreferencesActivity.KEY_HOSTNAME,
+                "bustracker.selfip.org");
+        try {
+            remotePort = Integer.parseInt(sp.getString(
+                    PreferencesActivity.KEY_PORT, "4876"));
+        } catch(NumberFormatException e) {
+            remotePort = 4876;
+        }
 
         stopCode = getIntent().getStringExtra("stopCode");
         if(stopCode == null || stopCode.length() == 0)
             handleError(ERROR_NOCODE);
 
+        showNightBuses = sp.getBoolean("pref_nightservices_state", true);
         autoRefresh = sp.getBoolean(PreferencesActivity.KEY_AUTOREFRESH_STATE,
                 false);
 
         if(savedInstanceState != null) {
+            jsonString = savedInstanceState.getString("jsonString");
             autoRefresh = savedInstanceState.getBoolean("autoRefresh", false);
         } else {
             autoRefresh = sp.getBoolean(
                     PreferencesActivity.KEY_AUTOREFRESH_STATE, false);
         }
-        
-        registerForContextMenu(getExpandableListView());
+
+        if(jsonString != null && jsonString.length() > 0) {
+            handleJSONString(jsonString);
+        } else if(!fetchTask.isExecuting()) {
+            showDialog(PROGRESS_DIALOG);
+            fetchTask.doTask(stopCode, remoteHost, remotePort);
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        
-        if(!busTimes.isExecuting()) {
-            HashMap<String, BusStop> busStops = busTimes.getBusStops();
-            if(busStops == null || !busStops.containsKey(stopCode)) {
-                showDialog(PROGRESS_DIALOG);
-                busTimes.doRequest(new String[] { stopCode });
-            } else {
-                displayData();
-            }
-        } else {
+
+        favouriteExists = SettingsDatabase.getInstance(getApplicationContext())
+                .getFavouriteStopExists(stopCode);
+        if((jsonString == null || jsonString.length() == 0)
+                && !fetchTask.isExecuting()) {
             showDialog(PROGRESS_DIALOG);
+            fetchTask.doTask(stopCode, remoteHost, remotePort);
         }
     }
 
@@ -139,7 +145,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
         super.onPause();
 
         autoRefresh = false;
-        mHandler.removeMessages(EVENT_REFRESH);
+        mHandler.removeMessages(99);
     }
 
     @Override
@@ -147,26 +153,42 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
         super.onSaveInstanceState(outState);
 
         outState.putBoolean("autoRefresh", autoRefresh);
+        outState.putString("jsonString", jsonString);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        busTimes.setHandler(null);
+        fetchTask.setHandler(null);
     }
 
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
         super.onCreateOptionsMenu(menu);
 
-        menu.add(0, FAVOURITE_ID, 1, R.string.displaystopdata_menu_remfav);
+        if(favouriteExists) {
+            menu.add(0, FAVOURITE_ID, 1, R.string.displaystopdata_menu_remfav);
+        } else {
+             menu.add(0, FAVOURITE_ID, 1, R.string.displaystopdata_menu_addfav);
+        }
 
-        menu.add(0, SORT_ID, 2, R.string.displaystopdata_menu_sort_service)
-                .setIcon(R.drawable.ic_menu_sort);
+        if(sp.getBoolean("pref_servicessorting_state", false)) {
+            menu.add(0, SORT_ID, 2, R.string.displaystopdata_menu_sort_service)
+                    .setIcon(R.drawable.ic_menu_sort);
+        } else {
+            menu.add(0, SORT_ID, 2, R.string.displaystopdata_menu_sort_times)
+                    .setIcon(R.drawable.ic_menu_sort);
+        }
 
-        menu.add(0, AUTO_REFRESH_ID, 3,
-                R.string.displaystopdata_menu_turnautorefreshoff)
-                .setIcon(R.drawable.ic_menu_auto_refresh);
+        if(autoRefresh) {
+            menu.add(0, AUTO_REFRESH_ID, 3,
+                    R.string.displaystopdata_menu_turnautorefreshoff)
+                    .setIcon(R.drawable.ic_menu_auto_refresh);
+        } else {
+            menu.add(0, AUTO_REFRESH_ID, 3,
+                    R.string.displaystopdata_menu_turnautorefreshon)
+                    .setIcon(R.drawable.ic_menu_auto_refresh);
+        }
 
         menu.add(0, REFRESH_ID, 4, R.string.displaystopdata_menu_refresh)
                 .setIcon(R.drawable.ic_menu_refresh);
@@ -179,8 +201,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
         super.onPrepareOptionsMenu(menu);
 
         MenuItem item = menu.findItem(FAVOURITE_ID);
-        if(SettingsDatabase.getInstance(getApplicationContext())
-                .getFavouriteStopExists(stopCode)) {
+        if(favouriteExists) {
             item.setTitle(R.string.displaystopdata_menu_remfav)
                     .setIcon(R.drawable.ic_menu_delete);
         } else {
@@ -209,8 +230,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
     public boolean onOptionsItemSelected(final MenuItem item) {
         switch(item.getItemId()) {
             case FAVOURITE_ID:
-                if(SettingsDatabase.getInstance(getApplicationContext())
-                .getFavouriteStopExists(stopCode)) {
+                if(favouriteExists) {
                     showDialog(CONFIRM_DELETE);
                 } else {
                     Intent intent = new Intent(this,
@@ -229,35 +249,26 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
                 SharedPreferences.Editor edit = sp.edit();
                 edit.putBoolean("pref_servicessorting_state", sortByTime);
                 edit.commit();
-                displayData();
+                handleJSONString(jsonString);
                 break;
             case AUTO_REFRESH_ID:
                 if(autoRefresh) {
                     autoRefresh = false;
-                    mHandler.removeMessages(EVENT_REFRESH);
+                    mHandler.removeMessages(99);
                 } else {
                     autoRefresh = true;
                     setUpAutoRefresh();
                 }
                 break;
             case REFRESH_ID:
-                mHandler.removeMessages(EVENT_REFRESH);
+                mHandler.removeMessages(99);
                 showDialog(PROGRESS_DIALOG);
-                busTimes.doRequest(new String[] { stopCode });
+                fetchTask.doTask(stopCode, remoteHost, remotePort);
                 break;
             default:
                 break;
         }
         return super.onOptionsItemSelected(item);
-    }
-    
-    @Override
-    public void onCreateContextMenu(final ContextMenu menu, final View v,
-            final ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        
-        menu.setHeaderTitle("Test context menu");
-        menu.add(0, ContextMenu.FIRST, 2, "Test context menu item");
     }
 
     @Override
@@ -289,6 +300,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
                     {
                         SettingsDatabase.getInstance(getApplicationContext())
                                 .deleteFavouriteStop(stopCode);
+                        favouriteExists = false;
                     }
                 }).setNegativeButton(R.string.cancel,
                         new DialogInterface.OnClickListener() {
@@ -307,21 +319,13 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(final Message msg) {
-            switch(msg.what) {
-                case EVENT_READY:
-                    displayData();
-                    break;
-                case EVENT_ERROR:
-                    if(msg.getData().containsKey("errorCode")) {
-                        handleError(msg.getData().getInt("errorCode"));
-                    }
-                    break;
-                case EVENT_REFRESH:
-                    showDialog(PROGRESS_DIALOG);
-                    busTimes.doRequest(new String[] { stopCode });
-                    break;
-                default:
-                    break;
+            if(msg.getData().containsKey("errorCode")) {
+                handleError(msg.getData().getInt("errorCode"));
+            } else if(msg.getData().containsKey("jsonString")) {
+                handleJSONString(msg.getData().getString("jsonString"));
+            } else if(msg.getData().containsKey("refresh")) {
+                showDialog(PROGRESS_DIALOG);
+                fetchTask.doTask(stopCode, remoteHost, remotePort);
             }
         }
     };
@@ -358,7 +362,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
             @Override
             public void onClick(final DialogInterface di, final int i) {
                 showDialog(PROGRESS_DIALOG);
-                busTimes.doRequest(new String[] { stopCode });
+                fetchTask.doTask(stopCode, remoteHost, remotePort);
             }
         }).setNegativeButton(R.string.cancel,
                 new DialogInterface.OnClickListener() {
@@ -369,89 +373,135 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
         });
         builder.create().show();
     }
-    
-    private void displayData() {
-        HashMap<String, BusStop> data = busTimes.getBusStops();
-        if(data == null) {
-            handleError(BusTimes.ERROR_NODATA);
-            return;
-        }
-        
-        EdinburghBusStop busStop = (EdinburghBusStop)data.get(stopCode);
-        if(busStop == null) {
-            handleError(BusTimes.ERROR_NODATA);
-            return;
-        }
-        
-        stopName = busStop.getStopName();
-        
-        StringBuilder sb = new StringBuilder();
-        sb.append(getString(R.string.displaystopdata_title2));
-        sb.append(' ');
-        sb.append(busStop.getStopName());
-        sb.append(" (");
-        sb.append(busStop.getStopCode());
-        sb.append(')');
-        setTitle(sb.toString());
-        
-        ArrayList<BusService> services;
-        if(sp.getBoolean("pref_servicessorting_state", false)) {
-            services = busStop.getSortedByTimeBusServices();
-        } else {
-            services = busStop.getBusServices();
-        }
-        
-        ArrayList<HashMap<String, String>> groupData =
-                new ArrayList<HashMap<String, String>>();
-        ArrayList<ArrayList<HashMap<String, String>>> childData =
-                new ArrayList<ArrayList<HashMap<String, String>>>();
-        HashMap<String, String> curGroupMap;
-        ArrayList<HashMap<String, String>> children;
-        HashMap<String, String> curChildMap;
-        
-        for(BusService busService : services) {
-            if(!sp.getBoolean("pref_nightservices_state", true) &&
-                    busService.getServiceName().startsWith("N")) continue;
-            
-            curGroupMap = new HashMap<String, String>();
-            groupData.add(curGroupMap);
-            curGroupMap.put(SERVICE_NAME_KEY, busService.getServiceName());
-            
-            children = new ArrayList<HashMap<String, String>>();
-            boolean first = true;
-            for(Bus lBus : busService.getBuses()) {
-                EdinburghBus bus = (EdinburghBus)lBus;
-                
-                if(first) {
-                    curGroupMap.put(DESTINATION_KEY, bus.getDestination());
-                    curGroupMap.put(ARRIVAL_TIME_KEY, bus.getArrivalTime());
-                } else {
-                    curChildMap = new HashMap<String, String>();
-                    children.add(curChildMap);
-                    curChildMap.put(DESTINATION_KEY, bus.getDestination());
-                    curChildMap.put(ARRIVAL_TIME_KEY, bus.getArrivalTime());
-                }
-                first = false;
-            }
-            childData.add(children);
-        }
-        
-        ExpandableListAdapter listAdapter = new SimpleExpandableListAdapter(
-                this, groupData, R.layout.expandable_list_group,
-                new String[] { SERVICE_NAME_KEY, DESTINATION_KEY,
-                    ARRIVAL_TIME_KEY },
-                new int[] { R.id.buslist_service, R.id.buslist_destination,
-                    R.id.buslist_time },
-                childData, R.layout.expandable_list_child,
-                new String[] { DESTINATION_KEY, ARRIVAL_TIME_KEY },
-                new int[] { R.id.buschild_destination, R.id.buschild_time });
-        setListAdapter(listAdapter);
 
-        if(progressDialogShown) dismissDialog(PROGRESS_DIALOG);
-        if(autoRefresh) setUpAutoRefresh();
+    private void handleJSONString(final String jsonString) {
+        this.jsonString = jsonString;
+        JSONObject jo;
+        try {
+            jo = new JSONObject(jsonString);
+
+            String sc = jo.getString("stopCode");
+            if(sc.length() == 0) {
+                handleError(ERROR_NODATA);
+                return;
+            }
+
+            stopName = jo.getString("stopName");
+            setTitle(getString(R.string.displaystopdata_title2) + " " +
+                    sc + " " + stopName);
+
+            JSONArray services = jo.getJSONArray("services");
+            int a = services.length();
+            if(a == 0) return;
+
+            BusServiceTimeMapping[] timesArray = new BusServiceTimeMapping[a];
+            String serviceName, timeString;
+            JSONObject currService, currBus;
+            JSONArray buses;
+            int i, b;
+            Calendar time;
+            int mins;
+            for(i = 0; i < a; i++) {
+                currService = services.getJSONObject(i);
+                serviceName = currService.getString("serviceName");
+                buses = currService.getJSONArray("buses");
+                b = buses.length();
+                if(b <= 0) continue;
+                currBus = buses.getJSONObject(0);
+                timeString = currBus.getString("arrivalTime");
+                time = Calendar.getInstance();
+                if(timeString.charAt(0) == '*')
+                    timeString = timeString.substring(1);
+                try {
+                    mins = Integer.parseInt(timeString);
+                    time.add(Calendar.MINUTE, mins);
+                } catch(NumberFormatException e) {
+                    if(timeString.indexOf(':') != -1) {
+                        time.set(Calendar.HOUR_OF_DAY,
+                                Integer.parseInt(timeString.split(":")[0]));
+                        time.set(Calendar.MINUTE,
+                                Integer.parseInt(timeString.split(":")[1]));
+                        if(time.compareTo(Calendar.getInstance()) < 0)
+                            time.add(Calendar.DAY_OF_WEEK, 1);
+                    } else if(!timeString.equals("DUE")) {
+                        time.add(Calendar.DAY_OF_WEEK, 2);
+                    }
+                }
+                timesArray[i] = new BusServiceTimeMapping(serviceName,
+                        time.getTime());
+            }
+            if(sp.getBoolean("pref_servicessorting_state", false))
+                Arrays.sort(timesArray);
+
+            ArrayList<HashMap<String, String>> groupData =
+                    new ArrayList<HashMap<String, String>>();
+            ArrayList<ArrayList<HashMap<String, String>>> childData =
+                    new ArrayList<ArrayList<HashMap<String, String>>>();
+            HashMap<String, String> curGroupMap;
+            ArrayList<HashMap<String, String>> children;
+            HashMap<String, String> curChildMap;
+            int k;
+
+            for(i = 0; i < a; i++) {
+                serviceName = "";
+                currService = null;
+                for(k = 0; k < a; k++) {
+                    currService = services.getJSONObject(k);
+                    serviceName = currService.getString("serviceName");
+                    if(timesArray[i].getServiceName().equals(serviceName))
+                        break;
+                }
+                if(!showNightBuses && serviceName.startsWith("N")) continue;
+                curGroupMap = new HashMap<String, String>();
+                groupData.add(curGroupMap);
+                curGroupMap.put(SERVICE_NAME_KEY, serviceName);
+                buses = currService.getJSONArray("buses");
+                children = new ArrayList<HashMap<String, String>>();
+                b = buses.length();
+                for(int j = 0; j < b; j++) {
+                    currBus = buses.getJSONObject(j);
+                    if(j==0) {
+                        curGroupMap.put(DESTINATION_KEY,
+                                currBus.getString("destination"));
+                        curGroupMap.put(ARRIVAL_TIME_KEY,
+                                currBus.getString("arrivalTime"));
+                    } else {
+                        curChildMap = new HashMap<String, String>();
+                        children.add(curChildMap);
+                        curChildMap.put(DESTINATION_KEY,
+                                currBus.getString("destination"));
+                        curChildMap.put(ARRIVAL_TIME_KEY,
+                                currBus.getString("arrivalTime"));
+                    }
+                }
+                childData.add(children);
+            }
+
+            ExpandableListAdapter listAdapter = new SimpleExpandableListAdapter(
+                    this, groupData,
+                    R.layout.expandable_list_group,
+                    new String[] { SERVICE_NAME_KEY, DESTINATION_KEY,
+                    ARRIVAL_TIME_KEY },
+                    new int[] { R.id.buslist_service, R.id.buslist_destination,
+                    R.id.buslist_time },
+                    childData, R.layout.expandable_list_child,
+                    new String[] { DESTINATION_KEY, ARRIVAL_TIME_KEY },
+                    new int[] { R.id.buschild_destination,
+                    R.id.buschild_time });
+            setListAdapter(listAdapter);
+
+            if(progressDialogShown) dismissDialog(PROGRESS_DIALOG);
+            if(autoRefresh) setUpAutoRefresh();
+        } catch(JSONException e) {
+            handleError(ERROR_PARSEERR);
+        }
     }
 
     private void setUpAutoRefresh() {
-        mHandler.sendEmptyMessageDelayed(EVENT_REFRESH, 60000);
+        Message msg = mHandler.obtainMessage(99);
+        Bundle bundle = new Bundle();
+        bundle.putBoolean("refresh", true);
+        msg.setData(bundle);
+        mHandler.sendMessageDelayed(msg, 60000);
     }
 }
