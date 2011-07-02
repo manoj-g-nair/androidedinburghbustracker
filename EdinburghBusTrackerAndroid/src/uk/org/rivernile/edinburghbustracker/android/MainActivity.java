@@ -26,26 +26,18 @@
 package uk.org.rivernile.edinburghbustracker.android;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
 import android.os.Looper;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.TextView;
 import android.widget.Toast;
 import java.io.BufferedReader;
 import java.io.File;
@@ -60,7 +52,6 @@ import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.util.Calendar;
 
 /**
  * The main activity in the application. This activity displays a the main menu
@@ -77,16 +68,6 @@ public class MainActivity extends Activity {
     private ImageButton stopMapButton;
     private ImageButton preferencesButton;
 
-    private TextView txtDBVersion;
-
-    private static final int MENU_NEWSUPDATES = 0;
-    private static final int MENU_ABOUT = 1;
-    private static final int MENU_NEAREST = 2;
-
-    private static final int DIALOG_ABOUT = 0;
-
-    private static File f;
-
     /**
      * {@inheritDoc}
      */
@@ -94,8 +75,6 @@ public class MainActivity extends Activity {
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home);
-
-        f = getDatabasePath(BusStopDatabase.STOP_DB_NAME);
 
         favouriteButton = (ImageButton) findViewById(R.id.favouriteButton);
         stopCodeButton = (ImageButton) findViewById(R.id.stopCodeButton);
@@ -143,11 +122,8 @@ public class MainActivity extends Activity {
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
         super.onCreateOptionsMenu(menu);
-        menu.add(0, MENU_NEWSUPDATES, 1, R.string.newsupdates_title)
-                .setIcon(R.drawable.ic_menu_agenda);
-        menu.add(0, MENU_ABOUT, 2, R.string.about_title)
+        menu.add(0, 0, 2, R.string.about_title)
                 .setIcon(R.drawable.ic_menu_info_details);
-        menu.add(0, MENU_NEAREST, 3, R.string.neareststops_title);
         return true;
     }
 
@@ -156,88 +132,8 @@ public class MainActivity extends Activity {
      */
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
-        switch(item.getItemId()) {
-            case MENU_NEWSUPDATES:
-                startActivity(new Intent(this, NewsUpdatesActivity.class));
-                break;
-            case MENU_ABOUT:
-                showDialog(DIALOG_ABOUT);
-                break;
-            case MENU_NEAREST:
-                startActivity(new Intent(this, NearestStopsActivity.class));
-                break;
-            default:
-                break;
-        }
+        startActivity(new Intent(this, AboutActivity.class));
         return super.onOptionsItemSelected(item);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected Dialog onCreateDialog(final int id) {
-        switch(id) {
-            case DIALOG_ABOUT:
-                LayoutInflater inflater = (LayoutInflater)getSystemService(
-                        LAYOUT_INFLATER_SERVICE);
-                View layout = inflater.inflate(R.layout.about,
-                        (ViewGroup)findViewById(R.id.aboutRoot));
-
-                TextView temp = (TextView)layout.findViewById(
-                        R.id.aboutVersion);
-                try {
-                    temp.setText(getText(R.string.version) + " " +
-                        getPackageManager().getPackageInfo(getPackageName(),
-                        0).versionName + " (#" + getPackageManager()
-                        .getPackageInfo(getPackageName(), 0).versionCode +
-                        ")");
-                } catch(NameNotFoundException e) {
-                    // This should never occur.
-                    temp.setText("Unknown");
-                }
-
-                txtDBVersion = (TextView)layout.findViewById(R.id
-                        .aboutDBVersion);
-                
-                Button close = (Button)layout.findViewById(R.id.aboutClose);
-                close.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(final View v) {
-                        dismissDialog(DIALOG_ABOUT);
-                    }
-                });
-
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setView(layout);
-
-                return builder.create();
-            default:
-                return null;
-        }
-    }
-
-    @Override
-    protected void onPrepareDialog(final int id, final Dialog d) {
-        switch(id) {
-            case DIALOG_ABOUT:
-                long dbtime;
-                Calendar date = Calendar.getInstance();
-                try {
-                    dbtime = BusStopDatabase.getInstance(this)
-                            .getLastDBModTime();
-                } catch(SQLException e) {
-                    dbtime = 0;
-                }
-                date.setTimeInMillis(dbtime);
-
-                txtDBVersion.setText(getText(R.string
-                        .main_aboutdialog_dbversion) + ": " + dbtime + " (" +
-                        date.getTime().toLocaleString() + ")");
-                break;
-            default:
-                break;
-        }
     }
 
     /**
@@ -247,7 +143,15 @@ public class MainActivity extends Activity {
         @Override
         public void run() {
             initStopDB();
-            checkForDBUpdates(getApplicationContext(), false);
+            try {
+                BusStopDatabase.getInstance(getApplicationContext())
+                        .getLastDBModTime();
+            } catch(SQLiteException e) {
+                File f = getDatabasePath(BusStopDatabase.STOP_DB_NAME);
+                if(f.exists()) f.delete();
+                initStopDB();
+            }
+            checkForDBUpdates();
         }
     };
 
@@ -257,50 +161,27 @@ public class MainActivity extends Activity {
      * moved from the assets directory to the working data directory.
      */
     private void initStopDB() {
+        File f = getDatabasePath(BusStopDatabase.STOP_DB_NAME);
         if(!f.exists()) {
-            restoreDBFromAssets();
-        } else {
-            long assetVersion = Long.parseLong(getString(
-                    R.string.asset_db_version));
-            long currentVersion = 0;
             try {
-                currentVersion = BusStopDatabase.getInstance(
-                        getApplicationContext()).getLastDBModTime();
-            } catch(SQLiteException e) {
-                f.delete();
-                restoreDBFromAssets();
-                return;
-            }
-
-            if(assetVersion > currentVersion) {
-                f.delete();
-                restoreDBFromAssets();
-            }
-        }
-    }
-
-    private boolean restoreDBFromAssets() {
-        try {
-            // Start of horrible hack to create database directory and
-            // set permissions if it doesn't already exist.
-            SQLiteDatabase db = MainActivity.this.openOrCreateDatabase(
-                    BusStopDatabase.STOP_DB_NAME, 0, null);
-            db.close();
-            // End of horrible hack.
-            InputStream in = getAssets().open(
-                    BusStopDatabase.STOP_DB_NAME);
-            FileOutputStream out = new FileOutputStream(f);
-            byte[] buf = new byte[1024];
-            int len;
-            while((len = in.read(buf)) > 0) {
-                out.write(buf, 0, len);
-            }
-            out.flush();
-            out.close();
-            in.close();
-            return true;
-        } catch(IOException e) {
-            return false;
+                // Start of horrible hack to create database directory and
+                // set permissions if it doesn't already exist.
+                SQLiteDatabase db = MainActivity.this.openOrCreateDatabase(
+                        BusStopDatabase.STOP_DB_NAME, 0, null);
+                db.close();
+                // End of horrible hack.
+                InputStream in = getAssets().open(
+                        BusStopDatabase.STOP_DB_NAME);
+                FileOutputStream out = new FileOutputStream(f);
+                byte[] buf = new byte[1024];
+                int len;
+                while((len = in.read(buf)) > 0) {
+                    out.write(buf, 0, len);
+                }
+                out.flush();
+                out.close();
+                in.close();
+            } catch(IOException e) { }
         }
     }
 
@@ -309,17 +190,14 @@ public class MainActivity extends Activity {
      * database. This gets checked upon app startup if it hasn't been checked
      * for more than 24 hours. If a database update does exist, its downloaded.
      */
-    public static void checkForDBUpdates(final Context context,
-            final boolean force) {
-        SharedPreferences sp = context.getSharedPreferences(
+    private void checkForDBUpdates() {
+        SharedPreferences sp = getSharedPreferences(
                 PreferencesActivity.PREF_FILE, 0);
         boolean autoUpdate = sp.getBoolean("pref_database_autoupdate", true);
 
-        if(autoUpdate || force) {
-            if(!force) {
-                long lastCheck = sp.getLong("lastUpdateCheck", 0);
-                if((System.currentTimeMillis() - lastCheck) < 86400000) return;
-            }
+        if(autoUpdate) {
+            long lastCheck = sp.getLong("lastUpdateCheck", 0);
+            if((System.currentTimeMillis() - lastCheck) < 86400000) return;
             String remoteHost = sp.getString(PreferencesActivity.KEY_HOSTNAME,
                     "bustracker.selfip.org");
             int remotePort;
@@ -362,16 +240,10 @@ public class MainActivity extends Activity {
             } catch(NumberFormatException e) {
                 return;
             }
-            if(dbLastMod > BusStopDatabase.getInstance(context)
-                    .getLastDBModTime()) {
-                updateStopsDB(context, dbURL);
-            } else {
-                if(force) {
-                    Looper.prepare();
-                    Toast.makeText(context, R.string.main_db_no_updates,
-                            Toast.LENGTH_LONG).show();
-                    Looper.loop();
-                }
+            if(dbLastMod > BusStopDatabase.getInstance(getApplicationContext())
+                        .getLastDBModTime())
+            {
+                updateStopsDB(getApplicationContext(), dbURL);
             }
             SharedPreferences.Editor edit = sp.edit();
             edit.putLong("lastUpdateCheck", System.currentTimeMillis());

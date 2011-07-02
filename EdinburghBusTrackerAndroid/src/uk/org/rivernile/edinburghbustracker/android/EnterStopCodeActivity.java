@@ -28,9 +28,7 @@ package uk.org.rivernile.edinburghbustracker.android;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -42,10 +40,7 @@ import android.widget.Toast;
  * @author Niall Scott
  */
 public class EnterStopCodeActivity extends Activity
-        implements View.OnClickListener, View.OnKeyListener {
-
-    private EditText txt;
-    private InputMethodManager imm;
+        implements View.OnClickListener {
 
     /**
      * {@inheritDoc}
@@ -55,11 +50,8 @@ public class EnterStopCodeActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.enterstopcode);
         setTitle(R.string.enterstopcode_title);
-        Button button = (Button)findViewById(R.id.enterstopcode_submit);
+        final Button button = (Button)findViewById(R.id.enterstopcode_submit);
         button.setOnClickListener(this);
-        txt = (EditText)findViewById(R.id.enterstopcode_entry);
-        txt.setOnKeyListener(this);
-        imm = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
     }
 
     /**
@@ -67,20 +59,7 @@ public class EnterStopCodeActivity extends Activity
      */
     @Override
     public void onClick(final View v) {
-        task();
-    }
-    
-    public boolean onKey(final View v, final int keyCode,
-            final KeyEvent event) {
-        if(event.getAction() == KeyEvent.ACTION_UP &&
-                keyCode == KeyEvent.KEYCODE_ENTER) {
-            imm.hideSoftInputFromWindow(txt.getWindowToken(), 0);
-            task();
-        }
-        return false;
-    }
-
-    private void task() {
+        EditText txt = (EditText)findViewById(R.id.enterstopcode_entry);
         if(txt.getText().length() == 0) {
             Toast.makeText(this, R.string.enterstopcode_toast_inputerr,
                     Toast.LENGTH_LONG).show();
