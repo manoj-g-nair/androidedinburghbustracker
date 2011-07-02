@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/*
+ * Copyright (C) 2009 - 2010 Niall 'Rivernile' Scott
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty.  In no event will the authors or contributors be held liable for
+ * any damages arising from the use of this software.
+ *
+ * The aforementioned copyright holder(s) hereby grant you a
+ * non-transferrable right to use this software for any purpose (including
+ * commercial applications), and to modify it and redistribute it, subject to
+ * the following conditions:
+ *
+ *  1. This notice may not be removed or altered from any file it appears in.
+ *
+ *  2. Any modifications made to this software, except those defined in
+ *     clause 3 of this agreement, must be released under this license, and
+ *     the source code of any modifications must be made available on a
+ *     publically accessible (and locateable) website, or sent to the
+ *     original author of this software.
+ *
+ *  3. Software modifications that do not alter the functionality of the
+ *     software but are simply adaptations to a specific environment are
+ *     exempt from clause 2.
+ */
+
+This version of strings.xml is in the developer's locale (en_GB) -->
+<resources>
+    <!-- Application strings -->
+    <string name="app_name">My Bus Edinburgh</string>
+    <string name="app_description">View live bus data in Edinburgh</string>
+    <string name="app_author">Niall Scott</string>
+    <string name="app_about">&lt;html>&lt;body>&lt;b>%appname&lt;/b>&lt;br>Version %vername (%vernumber)&lt;br>Stop DB version: %dbversion (%dbtime)&lt;p>&lt;a %url&lt;/a>&lt;br>Twitter: @MyBusEdinburgh&lt;/p>&lt;p>Author: Niall %quoteRivernile%quote Scott&lt;/p>&lt;p>Thanks to:&lt;br>Gordon Christie (EdinBus for iPhone developer)&lt;br>The City of Edinburgh Council&lt;br>Anthony Totton (App icon and website design)&lt;br>Scott Straughan (App interface reskinning)&lt;/p>&lt;p>Permission has been granted from The City of Edinburgh Council for this application to tie in to their data feed. Neither the author of the application, nor The City of Edinburgh Council take any responsibility for the accuracy of data supplied by this application or its implications, or any data loss or any other issues arising through its usage. Usage of this application signifies the user takes complete responsibility.&lt;/p>&lt;/body>&lt;/html></string>
+
+    <!-- Generic strings -->
+    <string name="submit">Submit</string>
+    <string name="preferences">Preferences</string>
+    <string name="error">Error</string>
+    <string name="okay">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="retry">Retry</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="save">Save</string>
+
+    <!-- Strings for MainActivity -->
+    <string name="main_favourite_stops">Favourite Stops</string>
+    <string name="main_enter_stop_code">Enter Stop Code</string>
+    <string name="main_bus_stop_map">Bus Stop Map</string>
+    <string name="main_db_updated">Edinburgh Bus Tracker: The stop database has
+    been updated to the latest version.</string>
+    <string name="main_updateavailable">There is an update available for this application. Would you like to visit the Android Market?</string>
+
+    <!-- Strings for EnterStopCodeActivity -->
+    <string name="enterstopcode_title">Enter Bus Stop Code</string>
+    <string name="enterstopcode_text">Enter the stop code. This can usually be found on a bus stop\'s timetable.</string>
+    <string name="enterstopcode_toast_inputerr">You need to enter a valid bus
+        stop code to view bus stop informtion. Usually this is an 8 digit
+        number.
+    </string>
+    <string name="enterstopcode_edit_hint">Enter bus stop code</string>
+
+    <!-- Strings for FavouriteStopsActivity -->
+    <string name="favouritestops_title">Favourite Bus Stops</string>
+    <string name="favouritestops_nosavedstops">You have no saved favourite bus
+    stops. You can add a new favourite stop by viewing the bus stop live
+    departures and select "Add Favourite" in the menu.</string>
+    <string name="favouritestops_dialog_confirm_title">Are you sure you want to
+    delete this stop?</string>
+    <string name="favouritestops_description">Long press on a stop name to reveal more options.</string>
+
+    <!-- Strings for FavouriteStopsActivity menu -->
+    <string name="favouritestops_menu_view">View stop</string>
+    <string name="favouritestops_menu_edit">Edit stop</string>
+    <string name="favouritestops_menu_delete">Delete stop</string>
+
+    <!-- Strings for DisplayStopDataActivity -->
+    <string name="displaystopdata_title">Display Bus Times</string>
+    <string name="displaystopdata_title2">Bus Stop:</string>
+    <string name="displaystopdata_gettingdata">Retrieving data from server...
+    </string>
+    <string name="displaystopdata_empty">There is currently no data to display.
+    </string>
+    <string name="displaystopdata_mins">mins</string>
+
+    <!-- Strings for DisplayStopDataActvity errors -->
+    <string name="displaystopdata_err_nocode">No stop code was provided.
+    </string>
+    <string name="displaystopdata_err_parseerr">There was an error whilst trying
+    to parse the incoming data.</string>
+    <string name="displaystopdata_err_noconn">A connection could not be made to
+    the server or an error occurred during transmission.</string>
+    <string name="displaystopdata_err_noresolv">The server could not be
+    resolved.</string>
+    <string name="displaystopdata_err_serverr">The server reported an error.
+    </string>
+    <string name="displaystopdata_err_nodata">There is no data for this bus
+    stop. Are you sure the supplied stop code is correct?</string>
+    <string name="displaystopdata_description">Live Bus Departures</string>
+    <string name="displaystopdata_description2">View live bus departures for your chosen stop. Press the menu key for more options.</string>
+
+    <!-- Strings for DisplayStopDataActivity menu -->
+    <string name="displaystopdata_menu_turnautorefreshon">Turn auto-refresh on
+    </string>
+    <string name="displaystopdata_menu_turnautorefreshoff">Turn auto-refresh off
+    </string>
+    <string name="displaystopdata_menu_refresh">Refresh</string>
+    <string name="displaystopdata_menu_addfav">Add as favourite</string>
+    <string name="displaystopdata_menu_remfav">Remove as favourite</string>
+
+    <!-- Strings for PreferencesActivity -->
+    <string name="preferences_title">Preferences</string>
+
+    <string name="preferences_category_bustimes">Bus Times Display</string>
+    <string name="preferences_checkbox_bustimes_autorefresh">Auto-refresh</string>
+    <string name="preferences_checkbox_bustimes_autorefresh_ticked">Untick to not auto-refresh bus times by default.</string>
+    <string name="preferences_checkbox_bustimes_autorefresh_unticked">Tick to auto-refresh bus times by default.</string>
+    <string name="preferences_checkbox_bustimes_nightbus">Show night services</string>
+    <string name="preferences_checkbox_bustimes_nightbus_ticked">Untick to not show night bus services.</string>
+    <string name="preferences_checkbox_bustimes_nightbus_unticked">Tick to show night bus services.</string>
+
+    <string name="preferences_category_map">Bus Stop Map</string>
+    <string name="preferences_checkbox_map_dbupdate">Auto-update database</string>
+    <string name="preferences_checkbox_map_dbupdate_ticked">Untick for the stop database to not be auto updated.</string>
+    <string name="preferences_checkbox_map_dbupdate_unticked">Tick for the stop database to auto update.</string>
+    <string name="preferences_checkbox_map_autolocation">Auto find location</string>
+    <string name="preferences_checkbox_map_autolocation_ticked">Untick to not find your location on the map.</string>
+    <string name="preferences_checkbox_map_autolocation_unticked">Tick to find your location on the map.</string>
+
+    <string name="preferences_category_advanced">Advanced</string>
+    <string name="preferences_textbox_advanced_hostname">Hostname</string>
+    <string name="preferences_textbox_advanced_hostname_summary">The hostname of the server. For advanced users only.</string>
+    <string name="preferences_textbox_advanced_port">Port</string>
+    <string name="preferences_textbox_advanced_port_summary">The port on the server.
+    For advanced users only.</string>
+
+    <string name="preferences_invalidhostname">The hostname you have entered is invalid, it has been reset back to the default value.</string>
+    <string name="preferences_invalidport">The port you have entered is invalid, it has been reset back to the default value.</string>
+    <string name="preferences_textbox_hostname_dialog">Edit Hostname</string>
+    <string name="preferences_textbox_port_dialog">Edit Port</string>
+
+    <!-- Strings for AddEditFavouriteStopActivity -->
+    <string name="addeditstop_title">Add/Edit Favourite Stop</string>
+    <string name="addeditstop_title_add">Add Favourite Stop:</string>
+    <string name="addeditstop_title_edit">Edit Stop Details</string>
+    <string name="addeditstop_title_description">You can enter a custom name for this bus stop below.</string>
+    <string name="addeditstop_description">Enter a name for this bus stop:
+    </string>
+    <string name="addeditstop_edit_stopname_hint">Stop name</string>
+    <string name="addeditstop_error_blankstopname">You cannot have a blank stop
+    name.</string>
+
+    <!-- Strings for BusStopMapActivity -->
+    <string name="map_title">Bus Stop Map</string>
+    <string name="map_dialog_showtimes">Show bus times</string>
+    <string name="map_dialog_close">Close</string>
+    <string name="map_dialog_noservices">There are no known services for this
+    stop.</string>
+    <string name="map_finding_location">Trying to determine your location...
+    </string>
+    <string name="map_location_unknown">Your current location is unknown.
+    </string>
+
+    <!-- Strings for BusStopMapActivity menu -->
+    <string name="map_menu_maptype_mapview">Map view</string>
+    <string name="map_menu_maptype_satellite">Satellite view</string>
+    <string name="map_menu_mapoverlay_trafficviewon">Traffic view on</string>
+    <string name="map_menu_mapoverlay_trafficviewoff">Traffic view off</string>
+    <string name="map_menu_mylocation">My location</string>
+
+    <!-- Strings for AboutActivity -->
+    <string name="about_title">About</string>
+</resources>
