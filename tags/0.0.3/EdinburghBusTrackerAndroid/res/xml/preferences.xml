@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/*
+ * Copyright (C) 2009 Niall 'Rivernile' Scott
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty.  In no event will the authors or contributors be held liable for
+ * any damages arising from the use of this software.
+ *
+ * The aforementioned copyright holder(s) hereby grant you a
+ * non-transferrable right to use this software for any purpose (including
+ * commercial applications), and to modify it and redistribute it, subject to
+ * the following conditions:
+ *
+ *  1. This notice may not be removed or altered from any file it appears in.
+ *
+ *  2. Any modifications made to this software, except those defined in
+ *     clause 3 of this agreement, must be released under this license, and
+ *     the source code of any modifications must be made available on a
+ *     publically accessible (and locateable) website, or sent to the
+ *     original author of this software.
+ *
+ *  3. Software modifications that do not alter the functionality of the
+ *     software but are simply adaptations to a specific environment are
+ *     exempt from clause 2.
+ */ -->
+
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:title="@string/preferences_category_bustimes">
+        <CheckBoxPreference
+            android:key="pref_autorefresh_state"
+            android:title="@string/preferences_checkbox_bustimes_autorefresh"
+            android:summaryOn="@string/preferences_checkbox_bustimes_autorefresh_ticked"
+            android:summaryOff="@string/preferences_checkbox_bustimes_autorefresh_unticked"
+            android:defaultValue="false" />
+        <CheckBoxPreference
+            android:key="pref_nightservices_state"
+            android:title="@string/preferences_checkbox_bustimes_nightbus"
+            android:summaryOn="@string/preferences_checkbox_bustimes_nightbus_ticked"
+            android:summaryOff="@string/preferences_checkbox_bustimes_nightbus_unticked"
+            android:defaultValue="true" />
+        <CheckBoxPreference
+            android:key="pref_servicessorting_state"
+            android:title="@string/preferences_checkbox_bustimes_sorting"
+            android:summaryOn="@string/preferences_checkbox_bustimes_sorting_ticked"
+            android:summaryOff="@string/preferences_checkbox_bustimes_sorting_unticked"
+            android:defaultValue="false" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="@string/preferences_category_map">
+        <CheckBoxPreference
+            android:key="pref_database_autoupdate"
+            android:title="@string/preferences_checkbox_map_dbupdate"
+            android:summaryOn="@string/preferences_checkbox_map_dbupdate_ticked"
+            android:summaryOff="@string/preferences_checkbox_map_dbupdate_unticked"
+            android:defaultValue="true" />
+        <CheckBoxPreference
+            android:key="pref_autolocation_state"
+            android:title="@string/preferences_checkbox_map_autolocation"
+            android:summaryOn="@string/preferences_checkbox_map_autolocation_ticked"
+            android:summaryOff="@string/preferences_checkbox_map_autolocation_unticked"
+            android:defaultValue="true" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="@string/preferences_category_advanced">
+        <EditTextPreference
+            android:key="pref_server_hostname"
+            android:title="@string/preferences_textbox_advanced_hostname"
+            android:summary="@string/preferences_textbox_advanced_hostname_summary"
+            android:defaultValue="bustracker.selfip.org"
+            android:dialogTitle="@string/preferences_textbox_hostname_dialog" />
+        <EditTextPreference
+            android:key="pref_server_port"
+            android:title="@string/preferences_textbox_advanced_port"
+            android:summary="@string/preferences_textbox_advanced_port_summary"
+            android:defaultValue="4876"
+            android:dialogTitle="@string/preferences_textbox_port_dialog"
+            android:numeric="integer" />
+        <uk.org.rivernile.edinburghbustracker.android.GenericDialogPreference
+            android:key="pref_backup_favourites"
+            android:title="@string/preferences_dialog_advanced_backup"
+            android:summary="@string/preferences_dialog_advanced_backup_summary"
+            android:dialogTitle="@string/preferences_dialog_advanced_backup"
+            android:dialogMessage="@string/preferences_dialog_advanced_backup_message"
+            android:positiveButtonText="@string/yes"
+            android:negativeButtonText="@string/no" />
+        <uk.org.rivernile.edinburghbustracker.android.GenericDialogPreference
+            android:key="pref_restore_favourites"
+            android:title="@string/preferences_dialog_advanced_restore"
+            android:summary="@string/preferences_dialog_advanced_restore_summary"
+            android:dialogTitle="@string/preferences_dialog_advanced_restore"
+            android:dialogMessage="@string/preferences_dialog_advanced_restore_message"
+            android:positiveButtonText="@string/yes"
+            android:negativeButtonText="@string/no" />
+    </PreferenceCategory>
+</PreferenceScreen>
