@@ -28,11 +28,10 @@
 This version of strings.xml is in the developer's locale (en_GB) -->
 <resources>
     <!-- Application strings -->
-    <string name="app_name">My Bus Edinburgh</string> <!-- Should not be changed -->
+    <string name="app_name">My Bus Edinburgh</string>
     <string name="app_description">View live bus data in Edinburgh</string>
-    <string name="app_author">Niall Scott</string> <!-- Should not be changed -->
-    <string name="search_hint">Search bus stops and places</string>
-    <string name="asset_db_version">1300011079753</string>
+    <string name="app_author">Niall Scott</string>
+    <string name="app_about">&lt;html>&lt;body>&lt;b>%appname&lt;/b>&lt;br>Version %vername (%vernumber)&lt;br>Stop DB version: %dbversion (%dbtime)&lt;p>&lt;a %url&lt;/a>&lt;br>Twitter: @MyBusEdinburgh&lt;/p>&lt;p>Author: Niall %quoteRivernile%quote Scott&lt;/p>&lt;p>Thanks to:&lt;br>Gordon Christie (EdinBus for iPhone developer)&lt;br>The City of Edinburgh Council&lt;br>Anthony Totton (App icon and website design)&lt;br>Scott Straughan (App interface reskinning)&lt;/p>&lt;p>Permission has been granted from The City of Edinburgh Council for this application to tie in to their data feed. Neither the author of the application, nor The City of Edinburgh Council take any responsibility for the accuracy of data supplied by this application or its implications, or any data loss or any other issues arising through its usage. Usage of this application signifies the user takes complete responsibility.&lt;/p>&lt;/body>&lt;/html></string>
 
     <!-- Generic strings -->
     <string name="submit">Submit</string>
@@ -43,39 +42,17 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="retry">Retry</string>
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
-    <string name="clear">Clear</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="save">Save</string>
-    <string name="services">Services</string>
-    <string name="version">Version</string>
-    <string name="close">Close</string>
-    <string name="search">Search</string>
-    <string name="distance">Distance</string>
 
     <!-- Strings for MainActivity -->
     <string name="main_favourite_stops">Favourite Stops</string>
     <string name="main_enter_stop_code">Enter Stop Code</string>
     <string name="main_bus_stop_map">Bus Stop Map</string>
-    <string name="main_db_updated">My Bus Edinburgh: The stop database has
+    <string name="main_db_updated">Edinburgh Bus Tracker: The stop database has
     been updated to the latest version.</string>
-    <string name="main_db_no_updates">My Bus Edinburgh: No stop database updates found.</string>
     <string name="main_updateavailable">There is an update available for this application. Would you like to visit the Android Market?</string>
-
-    <!-- String for MainActivity dialogs -->
-    <string name="main_aboutdialog_dbversion">Bus stop DB version</string>
-    <string name="main_aboutdialog_contact">Website: http://www.rivernile.org.uk/bustracker\nFollow @MyBusEdinburgh on Twitter for the latest updates.</string>
-    <string name="main_aboutdialog_body"><b>Thanks to the following people and
-    entities for making this application happen:</b>\nGordon Christie (EdinBus for
-    iPhone developer)\nThe City of Edinburgh Council\nAnthony Totton (App icon,
-    website and graphics)\nScott Straughan (App interface skinning)\n
-    \n<b>Disclaimer</b>\nPermission has been granted from The City of Edinburgh Council
-    for this application to tie in to their data feed. Neither the author of the
-    application, nor The City of Edinburgh Council take any responsibility for
-    the accuracy of data supplied by this application or its implications, or
-    any data loss or any other issues arising through the usage of this
-    application. Usage of this application signifies the user takes complete
-    responsibility.</string>
 
     <!-- Strings for EnterStopCodeActivity -->
     <string name="enterstopcode_title">Enter Bus Stop Code</string>
@@ -133,12 +110,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="displaystopdata_menu_refresh">Refresh</string>
     <string name="displaystopdata_menu_addfav">Add as favourite</string>
     <string name="displaystopdata_menu_remfav">Remove as favourite</string>
-    <string name="displaystopdata_menu_sort_service">Sort by service</string>
-    <string name="displaystopdata_menu_sort_times">Sort by time</string>
-    
-    <!-- Strings for DisplayStopDataActivity context menu -->
-    <string name="displaystopdata_context_title">empty</string>
-    <string name="displaystopdata_context_addalarm">Add new alarm...</string>
 
     <!-- Strings for PreferencesActivity -->
     <string name="preferences_title">Preferences</string>
@@ -150,9 +121,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="preferences_checkbox_bustimes_nightbus">Show night services</string>
     <string name="preferences_checkbox_bustimes_nightbus_ticked">Untick to not show night bus services.</string>
     <string name="preferences_checkbox_bustimes_nightbus_unticked">Tick to show night bus services.</string>
-    <string name="preferences_checkbox_bustimes_sorting">Sort by arrival time</string>
-    <string name="preferences_checkbox_bustimes_sorting_ticked">Untick to sort bus services by service name.</string>
-    <string name="preferences_checkbox_bustimes_sorting_unticked">Tick to sort bus services by arrival time.</string>
 
     <string name="preferences_category_map">Bus Stop Map</string>
     <string name="preferences_checkbox_map_dbupdate">Auto-update database</string>
@@ -161,17 +129,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="preferences_checkbox_map_autolocation">Auto find location</string>
     <string name="preferences_checkbox_map_autolocation_ticked">Untick to not find your location on the map.</string>
     <string name="preferences_checkbox_map_autolocation_unticked">Tick to find your location on the map.</string>
-    <string name="preferences_dialog_stopdb_update">Update stop database</string>
-    <string name="preferences_dialog_stopdb_update_summary">Check for stop database updates, and update if a new version is available.</string>
-    <string name="preferences_dialog_stopdb_update_message">Are you sure you want to update the bus stop database?</string>
-    <string name="preferences_dialog_map_clearsearchhistory">Clear search history</string>
-    <string name="preferences_dialog_map_clearsearchhistory_summary">Remove all previous search terms from the map search facility.</string>
-    <string name="preferences_dialog_map_clearsearchhistory_message">Are you sure you want to clear your map search history?</string>
-    
-    <string name="preferences_category_neareststops">Nearest Stops Display</string>
-    <string name="preferences_checkbox_neareststops_gpsdisabled">Disable GPS prompt</string>
-    <string name="preferences_checkbox_neareststops_gpsdisabled_ticked">Untick to show a prompt when GPS is disabled whilst viewing nearest bus stops.</string>
-    <string name="preferences_checkbox_neareststops_gpsdisabled_unticked">Tick to not show a prompt when GPS is disabled whilst viewing nearest bus stops.</string>
 
     <string name="preferences_category_advanced">Advanced</string>
     <string name="preferences_textbox_advanced_hostname">Hostname</string>
@@ -184,21 +141,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="preferences_invalidport">The port you have entered is invalid, it has been reset back to the default value.</string>
     <string name="preferences_textbox_hostname_dialog">Edit Hostname</string>
     <string name="preferences_textbox_port_dialog">Edit Port</string>
-
-    <string name="preferences_dialog_advanced_backup">Backup favourites</string>
-    <string name="preferences_dialog_advanced_backup_summary">Backup the list of favourite stops to the external storage.</string>
-    <string name="preferences_dialog_advanced_backup_message">Are you sure you want to backup your favourite stops list?</string>
-
-    <string name="preferences_dialog_advanced_restore">Restore favourites</string>
-    <string name="preferences_dialog_advanced_restore_summary">Restore the list of favourite stops from external storage.</string>
-    <string name="preferences_dialog_advanced_restore_message">Are you sure you want to restore your favourite stops list? Warning: This will overwrite your current favourite stops list.</string>
-
-    <string name="preferences_backup_error_nodb">The database does not exist.</string>
-    <string name="preferences_backup_error_mediaerror">There is a problem with the external storage. Is it present and not already in use?</string>
-    <string name="preferences_backup_error_ioerror">There was an error transferring the database. Either the database could not be found, or the location was inaccessible.</string>
-
-    <string name="preference_backup_success">The database was successfully backed up to external storage.</string>
-    <string name="preference_restore_success">The database was successfully restored from external storage.</string>
 
     <!-- Strings for AddEditFavouriteStopActivity -->
     <string name="addeditstop_title">Add/Edit Favourite Stop</string>
@@ -221,9 +163,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     </string>
     <string name="map_location_unknown">Your current location is unknown.
     </string>
-    <string name="map_search_progress_dialog">Searching location...</string>
-    <string name="map_search_dialog_title">Did you mean...?</string>
-    <string name="map_search_dialog_noresults">There were no results for your search.</string>
 
     <!-- Strings for BusStopMapActivity menu -->
     <string name="map_menu_maptype_mapview">Map view</string>
@@ -231,36 +170,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="map_menu_mapoverlay_trafficviewon">Traffic view on</string>
     <string name="map_menu_mapoverlay_trafficviewoff">Traffic view off</string>
     <string name="map_menu_mylocation">My location</string>
-    <string name="map_menu_filter">Filter services</string>
-
-    <!-- Strings for NewsUpdatesActivity -->
-    <string name="newsupdates_title">News and Updates</string>
-    <string name="newsupdates_description">View news about the application and get the latest bus and traffic updates.</string>
-    <string name="newsupdates_empty">There are currently no news or update items to display.</string>
-
-    <!-- Strings for NewsUpdatesActivity errors -->
-    <string name="newsupdates_err_nodata">No data was received from the Twitter server.</string>
-    <string name="newsupdates_err_parseerr">There was a parsing error while trying to process the incoming data.</string>
-    <string name="newsupdates_err_ioerr">There was an IO error while receiving data from the Twitter server. Sometimes this error will happen when Twitter is experiencing heavy load.</string>
-    <string name="newsupdates_err_urlerr">There was a problem formatting the URL to request the data from the Twitter server.</string>
-
-    <!-- Strings for NearestStopsActivity -->
-    <string name="neareststops_title">Nearest Bus Stops</string>
-    <string name="neareststops_empty">There is no data to display. This means that either your location could not be determined, or you are not in range of any bus stops.</string>
-    <string name="neareststops_turnongps_title">You do not have GPS turned on</string>
-    <string name="neareststops_turnongps_message">To get the most precise location information, GPS needs to be turned on. Turn on now?</string>
-    <string name="neareststops_turnongps_checkbox">Do not remind me again</string>
-    <!-- Strings for NearestStopsActivity menu -->
-    <string name="neareststops_menu_filter">Filter services</string>
-
-    <!-- Strings for NearestStopsActivity ListView contextual menu -->
-    <string name="neareststops_context_showonmap">Show stop on map</string>
-    <string name="neareststops_context_addasfav">Add stop as favourite</string>
-    <string name="neareststops_context_remasfav">Remove stop as favourite</string>
 
     <!-- Strings for AboutActivity -->
     <string name="about_title">About</string>
-    
-    <!-- Strings for ServiceFilter -->
-    <string name="servicefilter_title">Select services to filter</string>
 </resources>
