@@ -81,7 +81,6 @@ public class MainActivity extends Activity {
 
     private static final int MENU_NEWSUPDATES = 0;
     private static final int MENU_ABOUT = 1;
-    private static final int MENU_NEAREST = 2;
 
     private static final int DIALOG_ABOUT = 0;
 
@@ -121,8 +120,11 @@ public class MainActivity extends Activity {
         stopMapButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(final View v) {
-                startActivity(new Intent(MainActivity.this,
-                        BusStopMapActivity.class));
+                Intent intent = new Intent(MainActivity.this,
+                        BusStopMapActivity.class);
+                intent.putExtra(BusStopMapActivity.INTENT_LAYERS,
+                        BusStopMapActivity.SHOW_STOPS);
+                startActivity(intent);
             }
         });
 
@@ -147,7 +149,6 @@ public class MainActivity extends Activity {
                 .setIcon(R.drawable.ic_menu_agenda);
         menu.add(0, MENU_ABOUT, 2, R.string.about_title)
                 .setIcon(R.drawable.ic_menu_info_details);
-        menu.add(0, MENU_NEAREST, 3, R.string.neareststops_title);
         return true;
     }
 
@@ -162,9 +163,6 @@ public class MainActivity extends Activity {
                 break;
             case MENU_ABOUT:
                 showDialog(DIALOG_ABOUT);
-                break;
-            case MENU_NEAREST:
-                startActivity(new Intent(this, NearestStopsActivity.class));
                 break;
             default:
                 break;

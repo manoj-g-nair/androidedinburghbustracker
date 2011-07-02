@@ -72,18 +72,6 @@ public class BusStopDatabase extends SQLiteOpenHelper {
                 null, null);
         return c;
     }
-    
-    public Cursor getFilteredStopsByCoords(final int minX, final int minY,
-            final int maxX, final int maxY, final String filter) {
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor c = db.rawQuery("SELECT bus_stops._id, bus_stops.stopName, " +
-	    "bus_stops.x, bus_stops.y FROM service_stops LEFT JOIN bus_stops " +
-            "ON service_stops.stopCode = bus_stops._id WHERE " +
-            "service_stops.serviceName IN (" + filter + ") AND x <= " + minX +
-            " AND y >= " + minY + " AND x >= " + maxX + " AND y <= " + maxY +
-            " GROUP BY bus_stops._id", null);
-        return c;
-    }
 
     public Cursor getBusStopByCode(final String stopCode) {
         SQLiteDatabase db = getReadableDatabase();
@@ -97,8 +85,7 @@ public class BusStopDatabase extends SQLiteOpenHelper {
         SQLiteDatabase db = getReadableDatabase();
         Cursor c = db.query(true, "service_stops",
                 new String[] { "serviceName" }, "stopCode = " + stopCode, null,
-                null, null, "CASE WHEN serviceName GLOB '[^0-9.]*' THEN " +
-                "serviceName ELSE cast(serviceName AS int) END", null);
+                null, null, "serviceName ASC", null);
         int count = c.getCount();
         int i = 0;
         if(count > 0) {
@@ -137,28 +124,5 @@ public class BusStopDatabase extends SQLiteOpenHelper {
                 " OR stopName LIKE \"%" + term + "%\"", null, null, null, null);
 
         return c;
-    }
-    
-    public String[] getBusServiceList() {
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor c = db.query(true, "service_stops",
-                new String[] { "serviceName" }, null, null, null, null,
-                "CASE WHEN serviceName GLOB '[^0-9.]*' THEN serviceName " +
-                "ELSE cast(serviceName AS int) END", null);
-        int count = c.getCount();
-        int i = 0;
-        if(count > 0) {
-            String[] result = new String[count];
-            while(!c.isLast()) {
-                c.moveToNext();
-                result[i] = c.getString(0);
-                i++;
-            }
-            c.close();
-            return result;
-        } else {
-            c.close();
-            return new String[] { };
-        }
     }
 }

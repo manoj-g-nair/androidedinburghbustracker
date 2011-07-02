@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2011 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -47,13 +47,11 @@ import uk.org.rivernile.edinburghbustracker.android
         .AddEditFavouriteStopActivity;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.DisplayStopDataActivity;
-import uk.org.rivernile.edinburghbustracker.android.Filterable;
 import uk.org.rivernile.edinburghbustracker.android.R;
-import uk.org.rivernile.edinburghbustracker.android.ServiceFilter;
 import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
 
 public class BusStopMapOverlay extends ItemizedOverlay<BusStopOverlayItem>
-        implements OnItemClickListener, Filterable {
+        implements OnItemClickListener {
 
     private ArrayList<BusStopOverlayItem> items =
             new ArrayList<BusStopOverlayItem>();
@@ -68,13 +66,11 @@ public class BusStopMapOverlay extends ItemizedOverlay<BusStopOverlayItem>
     private ArrayAdapter<String> ad;
 
     private Dialog confirmDialog;
-    private ServiceFilter serviceFilter;
 
     public BusStopMapOverlay(final Drawable defaultMarker,
             final MapActivity context, final MapView mapView)
     {
         super(boundCenterBottom(defaultMarker));
-        serviceFilter = ServiceFilter.getInstance(context);
         this.context = context;
         this.mapView = mapView;
         lastZoom = mapView.getZoomLevel();
@@ -103,9 +99,7 @@ public class BusStopMapOverlay extends ItemizedOverlay<BusStopOverlayItem>
         setLastFocusedIndex(-1);
         items.clear();
         populate();
-        boolean filtered = serviceFilter.isFiltered();
-        int zoomLevel = filtered ? 9 : 15;
-        if(mapView.getZoomLevel() >= zoomLevel) {
+        if(mapView.getZoomLevel() >= 16) {
             int minX, minY, maxX, maxY, latSpan, longSpan;
             GeoPoint g = mapView.getMapCenter();
             latSpan = (mapView.getLatitudeSpan() / 2) + 1;
@@ -115,13 +109,7 @@ public class BusStopMapOverlay extends ItemizedOverlay<BusStopOverlayItem>
             maxX = g.getLatitudeE6() - latSpan;
             maxY = g.getLongitudeE6() + longSpan;
             BusStopDatabase bsd = BusStopDatabase.getInstance(context);
-            Cursor c;
-            if(filtered) {
-                c = bsd.getFilteredStopsByCoords(minX, minY, maxX, maxY,
-                        serviceFilter.toString());
-            } else {
-                c = bsd.getBusStopsByCoords(minX, minY, maxX, maxY);
-            }
+            Cursor c = bsd.getBusStopsByCoords(minX, minY, maxX, maxY);
             if(c.getCount() > 0) {
                 while(!c.isLast()) {
                     c.moveToNext();
@@ -175,7 +163,6 @@ public class BusStopMapOverlay extends ItemizedOverlay<BusStopOverlayItem>
             stopDialog.dismiss();
             showStopDialog();
         }
-        serviceFilter.setCallback(this);
     }
 
     private void createStopDialog() {
@@ -286,11 +273,5 @@ public class BusStopMapOverlay extends ItemizedOverlay<BusStopOverlayItem>
                 stopDialog.dismiss();
                 break;
         }
-    }
-    
-    @Override
-    public void onFilterSet() {
-        doPopulateBusStops();
-        mapView.invalidate();
     }
 }

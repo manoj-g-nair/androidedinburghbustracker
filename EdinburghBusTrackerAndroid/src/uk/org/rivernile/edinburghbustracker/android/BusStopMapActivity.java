@@ -53,17 +53,17 @@ import uk.org.rivernile.edinburghbustracker.android.mapoverlays
 public class BusStopMapActivity extends MapActivity implements
         OnItemClickListener{
 
+    public static final String INTENT_LAYERS = "LAYERS";
+
     public static final int SHOW_STOPS = 1;
 
     public static final int DIALOG_PROGRESS = 0;
     public static final int DIALOG_SEARCH_RESULTS = 1;
-    public static final int DIALOG_FILTER = 2;
 
     private static final int MENU_MYLOCATION = 0;
     private static final int MENU_SEARCH = 1;
     private static final int MENU_MAPTYPE = 2;
     private static final int MENU_OVERLAY_TRAFFICVIEW = 3;
-    private static final int MENU_FILTER = 4;
 
     private static final int DEFAULT_LAT = 55948611;
     private static final int DEFAULT_LONG = -3199811;
@@ -76,7 +76,6 @@ public class BusStopMapActivity extends MapActivity implements
 
     private String searchTerm;
     private MapSearchHelper searcher;
-    private ServiceFilter serviceFilter = null;
 
     /**
      * {@inheritDoc}
@@ -88,9 +87,6 @@ public class BusStopMapActivity extends MapActivity implements
 
         mapView = (MapView)findViewById(R.id.mapview);
         mapView.setBuiltInZoomControls(true);
-        myLocation = new MyLocationOverlayFix(this, mapView);
-        mapView.getOverlays().add(myLocation);
-        Intent intent = getIntent();
 
         if(savedInstanceState != null &&
                 savedInstanceState.containsKey("currentLat") &&
@@ -103,41 +99,38 @@ public class BusStopMapActivity extends MapActivity implements
             mapView.getController().setZoom(savedInstanceState
                     .getInt("currentZoom", DEFAULT_ZOOM));
         } else {
-            if(intent.hasExtra("lat") && intent.hasExtra("long") &&
-                    intent.hasExtra("zoom"))
-            {
-                mapView.getController().setCenter(new GeoPoint(
-                        intent.getIntExtra("lat", DEFAULT_LAT),
-                        intent.getIntExtra("long", DEFAULT_LONG)));
-                mapView.getController().setZoom(intent.getIntExtra("zoom", 12));
-            } else {
-                mapView.getController().setCenter(new GeoPoint(DEFAULT_LAT,
-                    DEFAULT_LONG));
-                mapView.getController().setZoom(12);
-                myLocation.runOnFirstFix(new Runnable() {
-                    @Override
-                    public void run() {
-                        mapView.getController().setCenter(myLocation
-                                .getMyLocation());
-                        mapView.getController().setZoom(17);
-                    }
-                });
-            }
+            mapView.getController().setCenter(new GeoPoint(55948611, -3199811));
+            mapView.getController().setZoom(12);
         }
 
-        stopOverlay = new BusStopMapOverlay(getResources().getDrawable(
-                R.drawable.mapmarker), this, mapView);
-        mapView.getOverlays().add(stopOverlay);
-        if(savedInstanceState != null &&
-                savedInstanceState.containsKey("currentSelectedStopCode"))
-            stopOverlay.setCurrentStopCodeAndShowDialog(savedInstanceState
-                        .getString("currentSelectedStopCode"));
+        myLocation = new MyLocationOverlayFix(this, mapView);
+        myLocation.runOnFirstFix(new Runnable() {
+            @Override
+            public void run() {
+                mapView.getController().setCenter(myLocation.getMyLocation());
+                mapView.getController().setZoom(17);
+            }
+        });
+        mapView.getOverlays().add(myLocation);
 
-        searcher = MapSearchHelper.getInstance(this);
+        Intent intent = getIntent();
+        int layers = intent.getIntExtra(INTENT_LAYERS, 0);
+        if((layers & SHOW_STOPS) == SHOW_STOPS) {
+            stopOverlay = new BusStopMapOverlay(getResources()
+                    .getDrawable(R.drawable.mapmarker), this, mapView);
+            mapView.getOverlays().add(stopOverlay);
+            if(savedInstanceState != null &&
+                    savedInstanceState.containsKey("currentSelectedStopCode"))
+                stopOverlay.setCurrentStopCodeAndShowDialog(savedInstanceState
+                        .getString("currentSelectedStopCode"));
+        }
+
         if(Intent.ACTION_SEARCH.equals(intent.getAction())) {
             searchTerm = intent.getStringExtra(SearchManager.QUERY);
-            searcher.doSearch(searchTerm);
+            doSearch();
         }
+
+        searcher = MapSearchHelper.getInstance(this);
     }
 
     /**
@@ -152,8 +145,6 @@ public class BusStopMapActivity extends MapActivity implements
             myLocation.enableMyLocation();
         }
         if(stopOverlay != null) stopOverlay.mapResumed();
-        
-        serviceFilter = ServiceFilter.getInstance(this);
     }
 
     /**
@@ -165,22 +156,31 @@ public class BusStopMapActivity extends MapActivity implements
         myLocation.disableMyLocation();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onNewIntent(final Intent intent) {
         super.onNewIntent(intent);
 
+        /**setIntent(intent);
+
+        int layers = intent.getIntExtra(INTENT_LAYERS, 0);
+        if(((layers & SHOW_STOPS) == SHOW_STOPS) && stopOverlay == null) {
+            stopOverlay = new BusStopMapOverlay(getResources()
+                    .getDrawable(R.drawable.mapmarker), this, mapView);
+            mapView.getOverlays().add(stopOverlay);
+        } else if(((layers & SHOW_STOPS) != SHOW_STOPS) &&
+                stopOverlay != null) {
+            mapView.getOverlays().remove(stopOverlay);
+            stopOverlay = null;
+        }
+
+        mapView.postInvalidate();**/
+
         if(Intent.ACTION_SEARCH.equals(intent.getAction())) {
             searchTerm = intent.getStringExtra(SearchManager.QUERY);
-            searcher.doSearch(searchTerm);
+            doSearch();
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onSaveInstanceState(final Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -220,8 +220,6 @@ public class BusStopMapActivity extends MapActivity implements
         menu.add(0, MENU_OVERLAY_TRAFFICVIEW, 4,
                 R.string.map_menu_mapoverlay_trafficviewoff)
                 .setIcon(R.drawable.ic_menu_trafficview);
-        menu.add(0, MENU_FILTER, 5, R.string.map_menu_filter)
-                .setIcon(R.drawable.ic_menu_filter);
 
         return true;
     }
@@ -278,18 +276,12 @@ public class BusStopMapActivity extends MapActivity implements
             case MENU_OVERLAY_TRAFFICVIEW:
                 mapView.setTraffic(!mapView.isTraffic());
                 break;
-            case MENU_FILTER:
-                showDialog(DIALOG_FILTER);
-                break;
             default:
                 break;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected Dialog onCreateDialog(final int id) {
         switch(id) {
@@ -319,18 +311,15 @@ public class BusStopMapActivity extends MapActivity implements
                 ad.setTitle(R.string.map_search_dialog_title);
                 ad.setView(layout);
                 return ad.create();
-            case DIALOG_FILTER:
-                if(serviceFilter == null)
-                    serviceFilter = ServiceFilter.getInstance(this);
-                return serviceFilter.getFilterDialog();
             default:
                 return null;
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    private void doSearch() {
+        searcher.doSearch(searchTerm);
+    }
+
     @Override
     public void onItemClick(final AdapterView<?> l, final View view,
             final int position, final long id) {
