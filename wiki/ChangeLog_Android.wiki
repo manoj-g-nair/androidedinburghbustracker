@@ -3,6 +3,46 @@
 
 = ChangeLog for the Android client application =
 
+=== 2.0.2 ===
+ * Fixed sorting of bus services in the times display (for example, 3 and 3A were not together in the list).
+ * Fixed a UI bug on some devices (such as HTC Sense) where the list view in the bus stop dialog was shown as white text on a white background.
+ * Added thread locking around database methods as this could be the cause of many of the database problems.
+ * Reverted back to putting a star ( `*` ) next to estimated, not real bus times.
+ * Speeded up scrolling of favourite bus stops if the user had enough elements in the list.
+
+=== 2.0.1 ===
+ * Added better exception handling around database code to attempt to deal with problems more gracefully.
+ * Fixed a crash in the bus stop map activity where the location point is null.
+ * MD5 checksum the bus stop database to make sure it's not corrupt after downloading an update.
+ * Fixed a crash after using the map search function and scrolling the resulting list.
+
+=== 2.0 ===
+ * Projected migrated away from old NBAndroid format to standard Android project format.
+ * The bus times are now retrieved from the new My Bus Tracker API.
+ * New feature: nearest bus stops listing.
+ * New feature: bus service filtering has been added to the bus stop map and the new nearest bus stops listing.
+ * Fetchers have been re-written to use AsyncTask so that Android handles threading.
+ * The bus stop map can be told to start up with a focus on a particular bus stop.
+ * New feature: the bus times display now shows how long it has been since the last refresh.
+ * New feature: favourite bus stops also show which services stop at that bus stop.
+ * Preferences have been reordered to make it more logical.
+ * New feature: added a user preference to let users show the favourite bus stops upon application start-up.
+ * More/better use of convertView on list adapters for faster loading.
+ * New feature: StreetView integration.
+ * Redesigned the bus stop dialog to fit in more with the Android look and feel.
+ * Menu declarations are no longer in code, they have been pulled out to XML.
+ * New feature: bus arrival alerts (experimental feature).
+ * New feature: bus stop proximity alerts (experimental feature).
+ * New feature: QR code support. Supported externally to application by URL interception, or inside the application by starting the zxing scanner and getting the activity result.
+ * Partial re-write of the bus stop map for reliability.
+ * Improved searching on the bus stop map.
+ * Favourite stop backups has changed to use JSON rather than just copying the database. Should improve future integration with Google Backup.
+ * Removed old artwork and added new artwork.
+ * Redesigned user interface and adding Honeycomb/Ice Cream Sandwich support.
+ * Database updating has changed.
+ * Added !BugSense for better error tracking.
+
+
 === 0.0.4 ===
   * Added the ability to get the latest news and travel updates within the application. This grabs the feeds from a Twitter list. This can be accessed from the main screen, then press the menu key on the device, then select 'News and Updates'. This data can be refreshed from the menu.
   * Increased the padding on the expandable list where the bus stop times are shown to improve the look of the cells.
