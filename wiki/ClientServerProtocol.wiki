@@ -1,6 +1,9 @@
 #summary An outline of the client-server protocol.
+#labels Deprecated
 
 = Introduction =
+
+SINCE MY BUS EDINBURGH 2.0, THIS IS NOW DEPRECATED.
 
 The client-server protocol is described here.
 
