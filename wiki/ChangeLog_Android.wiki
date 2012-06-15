@@ -3,6 +3,29 @@
 
 = ChangeLog for the Android client application =
 
+=== 2.1 ===
+ * New feature: on certain devices on Android 2.2 (Froyo) or above, the application will automatically backup user settings and saved bus stops to Google Backup.
+ * New feature: added a user preference where the user can specify how many departures per service is shown at each bus stop.
+ * New feature: replace the bus stop marker icons on the map with new icons which show the direction of the bus stop.
+ * New feature: where possible, show locality information for the bus stop.
+ * New feature: Italian localisation - thanks Matteo Doni!
+ * Added intent filter for DisplayStopDataActivity so that other application can load bus times using this activity.
+ * Fixed an issue in the map search results list on certain devices where the row background colour was the same as the text colour making it unreadable.
+ * Made the ActionBar semi-transparent in the bus stop map for devices running Android 3.0 (Honeycomb) or later, like in the Google Maps app.
+ * Added a clickable link to the project Twitter feed in the About dialog.
+ * Fixed an issue where loading the location settings activity on Android 4.0 (Ice Cream Sandwich) showed the wrong settings activity.
+ * Added performance improvements in navigating the bus stop map.
+ * Fixed an issue which crashed the app when trying to load the QR code scanning activity.
+ * Re-write the Twitter parser which now looks cleaner and is abstracted away from the UI code, and it now deals with HTML encoded characters properly. The new API URL is used as the current one being used is about to be deprecated.
+ * The ActionBar is now a consistent theme throughout all activities on Android 4.0 (Ice Cream Sandwich) and later.
+ * Cleaned up resources and a small amount of code based on recommendations from the new lint tool.
+ * Cleaned up the application preferences (renamed to "Settings") based on recommendations from the Android Design website.
+ * Database handling code has been cleaned up. Performance enhancements are possible as a result.
+ * Custom Ant build rules have been moved out to custom_rules.xml, as per recommendations in API level 15 build tools.
+ * Fixed an issue where the "Distance" text where the nearest bus stops are shown can wrap on certain devices - thanks Ross McClymont.
+ * When the user sets a time alert and the user taps on the resulting notification, the bus times are now force refreshed (causes old data to be refreshed if it exists) - thanks Ross McClymont.
+
+
 === 2.0.2 ===
  * Fixed sorting of bus services in the times display (for example, 3 and 3A were not together in the list).
  * Fixed a UI bug on some devices (such as HTC Sense) where the list view in the bus stop dialog was shown as white text on a white background.
