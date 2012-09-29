@@ -3,6 +3,8 @@
 
 = Introduction =
 
+*These instructions do not apply to trunk. Please only use these instructions for the 2.1 tag. New instructions will be written in due course.*
+
 Compiling and running My Bus Edinburgh is not as straight-forward as one might think. A few steps need to be undertaken before this is possible.
 
 = Tools and prerequisites =
@@ -21,7 +23,7 @@ Important: make sure the Android SDK tools are in your PATH.
 
 Now the prerequisites have been installed, the source can be downloaded. The project is hosted here on Google Code and the repository is SVN. You must have the SVN tools installed to download the source tree.
 
-The URL for the repository is: http://androidedinburghbustracker.googlecode.com/svn/trunk/EdinburghBusTrackerAndroid/ (This was the original name for the project before it became My Bus Edinburgh.)
+The URL for the repository is: http://androidedinburghbustracker.googlecode.com/svn/tags/2.1/EdinburghBusTrackerAndroid/ (This was the original name for the project before it became My Bus Edinburgh.)
 
 This URL can be fed in to your SVN GUI tool, or SVN command line. First of all, you should create a directory where the source code will be downloaded to (applicable to Mac OS X and Linux, adjust for Windows);
 
@@ -33,7 +35,7 @@ cd MyBusEdinburgh
 Now the source can be downloaded;
 
 {{{
-svn checkout http://androidedinburghbustracker.googlecode.com/svn/trunk/EdinburghBusTrackerAndroid/
+svn checkout http://androidedinburghbustracker.googlecode.com/svn/tags/2.1/EdinburghBusTrackerAndroid/
 }}}
 
 The source should now be downloaded.
