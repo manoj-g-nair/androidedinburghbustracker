@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2011 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,22 +25,27 @@
  *     exempt from clause 2.
 */ -->
 <menu
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" >
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/busstopmap_option_menu_mylocation"
+        android:title="@string/map_menu_mylocation"
+        android:icon="@drawable/ic_menu_mylocation"
+        android:showAsAction="ifRoom|withText" />
     <item
         android:id="@+id/busstopmap_option_menu_search"
         android:title="@string/search"
-        android:icon="@drawable/ic_menu_search" />
+        android:icon="@drawable/ic_menu_search"
+        android:showAsAction="ifRoom|withText" />
     <item
         android:id="@+id/busstopmap_option_menu_maptype"
-        android:icon="@drawable/ic_menu_maptype"
-        android:title="@string/map_menu_maptype" />
+        android:title="@string/map_menu_maptype_mapview"
+        android:showAsAction="ifRoom|withText" />
     <item
         android:id="@+id/busstopmap_option_menu_trafficview"
-        android:icon="@drawable/ic_menu_trafficview"
-        tools:ignore="MenuTitle" />
+        android:icon="@drawable/ic_menu_trafficview" />
     <item
-        android:id="@+id/busstopmap_option_menu_services"
-        android:title="@string/map_menu_services"
-        android:icon="@drawable/ic_menu_filter" />
+        android:id="@+id/busstopmap_option_menu_filter"
+        android:title="@string/map_menu_filter"
+        android:icon="@drawable/ic_menu_filter"
+        android:showAsAction="ifRoom|withText" />
 </menu>

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,11 +33,11 @@ package uk.org.rivernile.android.bustracker.parser.livetimes;
  * @author Niall Scott
  */
 public class Bus {
-    private final String destination;
-    private final String arrivalTime;
+    private String destination;
+    private String arrivalTime;
     
     /**
-     * Create a single instance of a bus and its corresponding destination and
+     * Create a single instance of a bus and its corrosponding destination and
      * arrival time. This class may be extended to suit the needs of a particlar
      * town or city.
      * 
@@ -46,6 +46,10 @@ public class Bus {
      * as a String so that you may format the time in any way you wish.
      */
     public Bus(final String destination, final String arrivalTime) {
+        if(destination == null || destination.length() == 0)
+            throw new IllegalArgumentException("The destination must not be " +
+                    "null or blank.");
+        
         if(arrivalTime == null || arrivalTime.length() == 0)
             throw new IllegalArgumentException("The arrival time must not be " +
                     "null or blank.");
@@ -64,9 +68,9 @@ public class Bus {
     }
 
     /**
-     * Get the destination of the bus service. Can be null.
+     * Get the destination of the bus service.
      * 
-     * @return The destination of the bus service. Can be null.
+     * @return The destination of the bus service.
      */
     public String getDestination() {
         return destination;

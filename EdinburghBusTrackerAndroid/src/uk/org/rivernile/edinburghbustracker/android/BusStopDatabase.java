@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2012 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,15 +30,11 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.text.Html;
-import android.text.Spanned;
-import android.text.SpannedString;
-import com.google.android.gms.maps.model.LatLng;
+import com.google.android.maps.GeoPoint;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 
 /**
  * This class deals with the handling of the Bus Stop Database. It deals with
@@ -50,14 +46,14 @@ import java.util.HashMap;
 public final class BusStopDatabase extends SQLiteOpenHelper {
 
     /** The name of the database. */
-    public static final String STOP_DB_NAME = "busstops9.db";
+    public static final String STOP_DB_NAME = "busstops8.db";
     /** This is the schema name of the database. */
-    public static final String SCHEMA_NAME = "MBE_9";
+    public static final String SCHEMA_NAME = "MBE_8";
     /** The version of the database. For internal use only. */
     protected static final int STOP_DB_VERSION = 1;
     
     private static final String BUS_STOPS_TABLE = "bus_stops";
-    private static final String BUS_STOPS_STOPCODE = "stopCode";
+    private static final String BUS_STOPS_STOPCODE = "_id";
     private static final String BUS_STOPS_STOPNAME = "stopName";
     private static final String BUS_STOPS_X = "x";
     private static final String BUS_STOPS_Y = "y";
@@ -71,21 +67,6 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
     private static final String SERVICE_STOPS_TABLE = "service_stops";
     private static final String SERVICE_STOPS_STOPCODE = "stopCode";
     private static final String SERVICE_STOPS_SERVICE_NAME = "serviceName";
-    
-    private static final String SERVICE_TABLE = "service";
-    private static final String SERVICE_ID = "_id";
-    private static final String SERVICE_SERVICE_NAME = "name";
-    
-    private static final String SERVICE_COLOUR_TABLE = "service_colour";
-    private static final String SERVICE_COLOUR_ID = "_id";
-    private static final String SERVICE_COLOUR_HEX_COLOUR = "hex_colour";
-    
-    private static final String SERVICE_POINT_TABLE = "service_point";
-    private static final String SERVICE_POINT_SERVICE_ID = "service_id";
-    private static final String SERVICE_POINT_ORDER_VALUE = "order_value";
-    private static final String SERVICE_POINT_CHAINAGE = "chainage";
-    private static final String SERVICE_POINT_LATITUDE = "latitude";
-    private static final String SERVICE_POINT_LONGITUDE = "longitude";
 
     private static BusStopDatabase instance = null;
     
@@ -104,20 +85,22 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
         
         f = context.getDatabasePath(STOP_DB_NAME);
         if(!f.exists()) {
-            new Thread(new RestoreDBFromAssetsTask(this)).start();
+            restoreDBFromAssets();
         } else {
-            final long assetVersion = Long.parseLong(context.getString(
+            long assetVersion = Long.parseLong(context.getString(
                     R.string.asset_db_version));
-            long currentVersion;
+            long currentVersion = 0;
             try {
                 currentVersion = getLastDBModTime();
             } catch(SQLiteException e) {
-                new Thread(new RestoreDBFromAssetsTask(this)).start();
+                f.delete();
+                restoreDBFromAssets();
                 return;
             }
 
             if(assetVersion > currentVersion) {
-                new Thread(new RestoreDBFromAssetsTask(this)).start();
+                f.delete();
+                restoreDBFromAssets();
             }
         }
     }
@@ -145,22 +128,16 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
     private synchronized boolean restoreDBFromAssets() {
         try {
             getWritableDatabase().close();
-            f.delete();
-            final InputStream in = context.getAssets().open(STOP_DB_NAME);
-            final FileOutputStream out = new FileOutputStream(f);
-            final byte[] buf = new byte[1024];
+            InputStream in = context.getAssets().open(STOP_DB_NAME);
+            FileOutputStream out = new FileOutputStream(f);
+            byte[] buf = new byte[1024];
             int len;
-            
             while((len = in.read(buf)) > 0) {
                 out.write(buf, 0, len);
             }
-            
             out.flush();
             out.close();
             in.close();
-            
-            setUpIndexes(getWritableDatabase());
-            
             return true;
         } catch(IOException e) {
             return false;
@@ -171,7 +148,7 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
      * {@inheritDoc} 
      */
     @Override
-    public void onCreate(final SQLiteDatabase db) {
+    public void onCreate(SQLiteDatabase db) {
         // The database should already exist, do nothing if it doesn't.
     }
 
@@ -180,25 +157,9 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
      */
     @Override
     public void onUpgrade(final SQLiteDatabase db, final int oldVersion,
-            final int newVersion) {
+            final int newVersion)
+    {
         // Do nothing.
-    }
-    
-    /**
-     * Set up the indexes on the database to increase performance. Creating
-     * index will cause the database to increase in size.
-     * 
-     * @param db The database to create the indexes on.
-     */
-    public static void setUpIndexes(final SQLiteDatabase db) {
-        try {
-            db.execSQL("CREATE INDEX service_point_index ON " +
-                    "service_point(service_id, chainage, order_value)");
-        } catch(SQLiteException e) {
-            // Nothing to do, except now when route lines are drawn, the app
-            // run like shit. This is most likely caused because we're out of
-            // disk space.
-        }
     }
 
     /**
@@ -211,24 +172,15 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
      * @param maxY The maximum latitude to return results for.
      * @return A database Cursor object with the result set.
      */
-    public synchronized Cursor getBusStopsByCoords(final double minX,
-            final double minY, final double maxX, final double maxY) {
+    public synchronized Cursor getBusStopsByCoords(final int minX,
+            final int minY, final int maxX, final int maxY) {
         try {
-            final String[] projection = new String[] {
-                BUS_STOPS_STOPCODE,
-                BUS_STOPS_STOPNAME,
-                BUS_STOPS_X,
-                BUS_STOPS_Y,
-                BUS_STOPS_ORIENTATION,
-                BUS_STOPS_LOCALITY
-            };
-            
-            final SQLiteDatabase db = getReadableDatabase();
-            return db.query(BUS_STOPS_TABLE, projection,
-                    '(' + BUS_STOPS_X + " BETWEEN ? AND ?) AND " +
-                    '(' + BUS_STOPS_Y + " BETWEEN ? AND ?)",
-                    new String[] { String.valueOf(minX), String.valueOf(maxX),
-                        String.valueOf(minY), String.valueOf(maxY)},
+            SQLiteDatabase db = getReadableDatabase();
+            return db.query(BUS_STOPS_TABLE, null,
+                    BUS_STOPS_X + " <= ? AND " + BUS_STOPS_Y + " >= ? AND " +
+                    BUS_STOPS_X + " >= ? AND " + BUS_STOPS_Y + " <= ?",
+                    new String[] { String.valueOf(minX), String.valueOf(minY),
+                        String.valueOf(maxX), String.valueOf(maxY)},
                     null, null, null);
         } catch(SQLiteException e) {
             return null;
@@ -248,11 +200,11 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
      * defined by the SQL 'IN' parameter.
      * @return A database Cursor object with the result set.
      */
-    public synchronized Cursor getFilteredStopsByCoords(final double minX,
-            final double minY, final double maxX, final double maxY,
+    public synchronized Cursor getFilteredStopsByCoords(final int minX,
+            final int minY, final int maxX, final int maxY,
             final String filter) {
         try {
-            final SQLiteDatabase db = getReadableDatabase();
+            SQLiteDatabase db = getReadableDatabase();
             return db.rawQuery("SELECT " +
                     BUS_STOPS_TABLE + '.' + BUS_STOPS_STOPCODE + ", " +
                     BUS_STOPS_TABLE + '.' + BUS_STOPS_STOPNAME + ", " +
@@ -266,11 +218,12 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
                     BUS_STOPS_TABLE + '.' + BUS_STOPS_STOPCODE + " WHERE " +
                     SERVICE_STOPS_TABLE + '.' + SERVICE_STOPS_SERVICE_NAME +
                     " IN (" + filter + ") AND " +
-                    '(' + BUS_STOPS_X + " BETWEEN ? AND ?) AND " +
-                    '(' + BUS_STOPS_Y + " BETWEEN ? AND ?) " +
+                    BUS_STOPS_X + " <= ? AND " + BUS_STOPS_Y + " >= ? AND " +
+                    BUS_STOPS_X + " >= ? AND " + BUS_STOPS_Y + " <= ? " +
                     "GROUP BY " + BUS_STOPS_TABLE + '.' + BUS_STOPS_STOPCODE,
-                    new String[] { String.valueOf(minX), String.valueOf(maxX),
-                        String.valueOf(minY), String.valueOf(maxY)});
+                    new String[] { String.valueOf(minX),
+                        String.valueOf(minY), String.valueOf(maxX),
+                        String.valueOf(maxY) });
         } catch(SQLiteException e) {
             return null;
         }
@@ -284,7 +237,7 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
      */
     public synchronized Cursor getBusStopByCode(final String stopCode) {
         try {
-            final SQLiteDatabase db = getReadableDatabase();
+            SQLiteDatabase db = getReadableDatabase();
             return db.query(BUS_STOPS_TABLE, null, BUS_STOPS_STOPCODE + " = ?",
                     new String[] { stopCode }, null, null, null);
         } catch(SQLiteException e) {
@@ -302,8 +255,8 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
         String[] result;
         
         try {
-            final SQLiteDatabase db = getReadableDatabase();
-            final Cursor c = db.query(true, SERVICE_STOPS_TABLE,
+            SQLiteDatabase db = getReadableDatabase();
+            Cursor c = db.query(true, SERVICE_STOPS_TABLE,
                     new String[] { SERVICE_STOPS_SERVICE_NAME },
                     SERVICE_STOPS_STOPCODE + " = ?", new String[] { stopCode },
                     null, null,
@@ -311,7 +264,7 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
                     " GLOB '[^0-9.]*' THEN " + SERVICE_STOPS_SERVICE_NAME +
                     " ELSE cast(" + SERVICE_STOPS_SERVICE_NAME + " AS int) END",
                     null);
-            final int count = c.getCount();
+            int count = c.getCount();
             int i = 0;
             if(count > 0) {
                 result = new String[count];
@@ -344,8 +297,8 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
         final String[] services = getBusServicesForStop(stopCode);
         if(services == null) return "";
         
-        final StringBuilder builder = new StringBuilder();
-        final int len = services.length;
+        StringBuilder builder = new StringBuilder();
+        int len = services.length;
         
         for(int i = 0; i < len; i++) {
             builder.append(services[i]);
@@ -366,13 +319,15 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
         long result = 0;
         
         try {
-            final SQLiteDatabase db = getReadableDatabase();
-            final Cursor c = db.query(true, DATABASE_INFO_TABLE,
+            SQLiteDatabase db = getReadableDatabase();
+            Cursor c = db.query(true, DATABASE_INFO_TABLE,
                     new String[] { DATABASE_INFO_UPDATE_TIME }, null, null,
                     null, null, null, null);
 
             if(c.moveToNext()) {
-                result = c.getLong(0);
+                try {
+                    result = Long.parseLong(c.getString(0));
+                } catch(NumberFormatException e) { }
             }
             
             c.close();
@@ -393,8 +348,8 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
         String result = "";
         
         try {
-            final SQLiteDatabase db = getReadableDatabase();
-            final Cursor c = db.query(true, DATABASE_INFO_TABLE,
+            SQLiteDatabase db = getReadableDatabase();
+            Cursor c = db.query(true, DATABASE_INFO_TABLE,
                     new String[] { DATABASE_INFO_TOPOLOGY }, null, null, null,
                     null, null, null);
             
@@ -418,23 +373,16 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
      * @return A Cursor object as a result set.
      */
     public synchronized Cursor searchDatabase(String term) {
-        final boolean searchCodes = term != null && term.length() >= 7;
-        
-        String whereClause = BUS_STOPS_STOPNAME + " LIKE ? OR " +
-                    BUS_STOPS_LOCALITY + " LIKE ?";
         term = '%' + term + '%';
-        final String[] whereArgs;
-        if (searchCodes) {
-            whereClause += " OR " + BUS_STOPS_STOPCODE + " LIKE ?";
-            whereArgs = new String[] { term, term, term };
-        } else {
-            whereArgs = new String[] { term, term };
-        }
-        
         try {
-            final SQLiteDatabase db = getReadableDatabase();
-            return db.query(BUS_STOPS_TABLE, null, whereClause, whereArgs,
-                    BUS_STOPS_STOPCODE, null, null);
+            SQLiteDatabase db = getReadableDatabase();
+            Cursor c = db.query(BUS_STOPS_TABLE, null,
+                    BUS_STOPS_STOPCODE + " LIKE ? OR " + BUS_STOPS_STOPNAME +
+                    " LIKE ? OR " + BUS_STOPS_LOCALITY + " LIKE ?",
+                    new String[] { term, term, term }, BUS_STOPS_STOPCODE,
+                    null, null);
+
+            return c;
         } catch(SQLiteException e) {
             return null;
         }
@@ -451,15 +399,15 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
         String[] result;
         
         try {
-            final SQLiteDatabase db = getReadableDatabase();
-            final Cursor c = db.query(true, SERVICE_TABLE,
-                    new String[] { SERVICE_SERVICE_NAME },
+            SQLiteDatabase db = getReadableDatabase();
+            Cursor c = db.query(true, SERVICE_STOPS_TABLE,
+                    new String[] { SERVICE_STOPS_SERVICE_NAME },
                     null, null, null, null,
-                    "CASE WHEN " + SERVICE_SERVICE_NAME +
-                    " GLOB '[^0-9.]*' THEN " + SERVICE_SERVICE_NAME +
-                    " ELSE cast(" + SERVICE_SERVICE_NAME + " AS int) END",
+                    "CASE WHEN " + SERVICE_STOPS_SERVICE_NAME +
+                    " GLOB '[^0-9.]*' THEN " + SERVICE_STOPS_SERVICE_NAME +
+                    " ELSE cast(" + SERVICE_STOPS_SERVICE_NAME + " AS int) END",
                     null);
-            final int count = c.getCount();
+            int count = c.getCount();
             if(count > 0) {
                 int i = 0;
                 result = new String[count];
@@ -487,18 +435,18 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
      * @param stopCode The bus stop code to get the GeoPoint for.
      * @return A GeoPoint which specifies a latitude and longitude.
      */
-    public synchronized LatLng getLatLngForStopCode(final String stopCode) {
-        LatLng point = null;
+    public synchronized GeoPoint getGeoPointForStopCode(final String stopCode) {
+        GeoPoint gp = null;
         
         try {
-            final SQLiteDatabase db = getReadableDatabase();
-            final Cursor c = db.query(BUS_STOPS_TABLE,
+            SQLiteDatabase db = getReadableDatabase();
+            Cursor c = db.query(BUS_STOPS_TABLE,
                     new String[] { BUS_STOPS_X, BUS_STOPS_Y },
                     BUS_STOPS_STOPCODE + " = ?", new String[] { stopCode },
                     null, null, null);
 
             if(c.moveToNext()) {
-                point = new LatLng(c.getDouble(0), c.getDouble(1));
+                gp = new GeoPoint(c.getInt(0), c.getInt(1));
             }
             
             c.close();
@@ -506,7 +454,7 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
             
         }
         
-        return point;
+        return gp;
     }
     
     /**
@@ -519,8 +467,8 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
         String result = null;
         
         try {
-            final SQLiteDatabase db = getReadableDatabase();
-            final Cursor c = db.query(BUS_STOPS_TABLE,
+            SQLiteDatabase db = getReadableDatabase();
+            Cursor c = db.query(BUS_STOPS_TABLE,
                     new String[] { BUS_STOPS_LOCALITY },
                     BUS_STOPS_STOPCODE + " = ?", new String[] { stopCode },
                     null, null, null);
@@ -546,8 +494,8 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
     public synchronized String getNameForBusStop(final String stopCode) {
         String result = "";
         try {
-            final SQLiteDatabase db = getReadableDatabase();
-            final Cursor c = db.query(BUS_STOPS_TABLE,
+            SQLiteDatabase db = getReadableDatabase();
+            Cursor c = db.query(BUS_STOPS_TABLE,
                     new String[] { BUS_STOPS_STOPNAME },
                     BUS_STOPS_STOPCODE + " = ?", new String[] { stopCode },
                     null, null, null);
@@ -562,158 +510,5 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
         }
         
         return result;
-    }
-    
-    /**
-     * Get a HashMap which contains the mapping of service names to service
-     * colours.
-     * 
-     * @param serviceList A String array of services. A null or empty list will
-     * mean that all services are returned.
-     * @return A mapping of service names to colours.
-     */
-    public synchronized HashMap<String, String> getServiceColours(
-            final String[] serviceList) {
-        // Create the HashMap now. We may need to return an empty version later
-        // if there's an error.
-        final HashMap<String, String> result = new HashMap<String, String>();
-        
-        try {
-            final SQLiteDatabase db = getReadableDatabase();
-            Cursor c;
-            
-            if(serviceList == null || serviceList.length == 0) {
-                // If the serviceList is null or empty, get all services.
-                c = db.rawQuery("SELECT " +
-                        SERVICE_TABLE + '.' + SERVICE_SERVICE_NAME + ", " +
-                        SERVICE_COLOUR_TABLE + '.' + SERVICE_COLOUR_HEX_COLOUR +
-                        " FROM " + SERVICE_COLOUR_TABLE + " LEFT JOIN " +
-                        SERVICE_TABLE + " ON " +
-                        SERVICE_TABLE + '.' + SERVICE_ID + " = " +
-                        SERVICE_COLOUR_TABLE + '.' + SERVICE_COLOUR_ID, null);
-            } else {
-                // If we've been given a list, we need to construct the parts
-                // of the 'IN' clause.
-                // Format: 'A','B','C'
-                final StringBuilder sb = new StringBuilder();
-                final int len = serviceList.length;
-                
-                for(int i = 0; i < len; i++) {
-                    if(i > 0) {
-                        sb.append(',');
-                    }
-                    
-                    sb.append('\'').append(serviceList[i]).append('\'');
-                }
-                
-                // Android selectArgs doesn't work with IN because the arguments
-                // inside the IN require their own single quotes, and Android
-                // comes along and puts its own single quotes in and bad things
-                // happen.
-                c = db.rawQuery("SELECT " +
-                        SERVICE_TABLE + '.' + SERVICE_SERVICE_NAME + ", " +
-                        SERVICE_COLOUR_TABLE + '.' + SERVICE_COLOUR_HEX_COLOUR +
-                        " FROM " + SERVICE_COLOUR_TABLE + " LEFT JOIN " +
-                        SERVICE_TABLE + " ON " +
-                        SERVICE_TABLE + '.' + SERVICE_ID + " = " +
-                        SERVICE_COLOUR_TABLE + '.' + SERVICE_COLOUR_ID +
-                        " WHERE " + SERVICE_TABLE + '.' + SERVICE_SERVICE_NAME +
-                        " IN (" + sb.toString() + ')', null);
-            }
-            
-            if(c != null) {
-                // Loop through the Cursor, putting each element in the HashMap.
-                while(c.moveToNext()) {
-                    result.put(c.getString(0), c.getString(1));
-                }
-                
-                c.close();
-            }
-        } catch(SQLiteException e) {
-            
-        }
-        
-        return result;
-    }
-    
-    /**
-     * Get a Cursor which contains all the known route points for a given
-     * service.
-     * 
-     * @param serviceName The serviceName to get the route points for.
-     * @return A Cursor containing the route points for the service.
-     */
-    public synchronized Cursor getServicePointsForService(
-            final String serviceName) {
-        if(serviceName == null || serviceName.length() == 0) {
-            throw new IllegalArgumentException("The serviceName cannot be " +
-                    "null or blank.");
-        }
-        
-        try {
-            final SQLiteDatabase db = getReadableDatabase();
-            return db.rawQuery("SELECT " + SERVICE_POINT_CHAINAGE + ", " + 
-                    SERVICE_POINT_LATITUDE + ", " + SERVICE_POINT_LONGITUDE +
-                    " FROM " + SERVICE_POINT_TABLE + " WHERE " +
-                    SERVICE_POINT_SERVICE_ID + " = (SELECT " + SERVICE_ID +
-                    " FROM " + SERVICE_TABLE + " WHERE " +
-                    SERVICE_SERVICE_NAME + " = ?) ORDER BY " +
-                    SERVICE_POINT_CHAINAGE + " ASC, " +
-                    SERVICE_POINT_ORDER_VALUE + " ASC",
-                    new String[] { serviceName });
-        } catch(SQLiteException e) {
-            return null;
-        }
-    }
-    
-    /**
-     * Return Spanned text which takes a String of service names (e.g. "1, 3, 34
-     * X25, N25, N26") and adds colour where appropriate.
-     * 
-     * Current rules;
-     * 
-     * - Wrap the character 'N' with formatting to colour the character red.
-     *   This is for night bus services.
-     * 
-     * @param serviceList A String containing a list of bus services.
-     * @return Spanned text, with added formatting.
-     */
-    public static Spanned getColouredServiceListString(
-            final String serviceList) {
-        if(serviceList == null) return new SpannedString("");
-        
-        return Html.fromHtml(serviceList.replace("N",
-                "<font color=\"red\">N</font>"));
-    }
-    
-    /**
-     * This task is run when a database needs to be restored from the assets
-     * directory.
-     */
-    private static class RestoreDBFromAssetsTask implements Runnable {
-        
-        private final BusStopDatabase bsd;
-        
-        /**
-         * Create a new task.
-         * 
-         * @param bsd A reference to the BusStopDatabase.
-         */
-        public RestoreDBFromAssetsTask(final BusStopDatabase bsd) {
-            if(bsd == null) {
-                throw new IllegalArgumentException("A reference to the " +
-                        "BusStopDatabase must be provided.");
-            }
-            
-            this.bsd = bsd;
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public void run() {
-            bsd.restoreDBFromAssets();
-        }
     }
 }

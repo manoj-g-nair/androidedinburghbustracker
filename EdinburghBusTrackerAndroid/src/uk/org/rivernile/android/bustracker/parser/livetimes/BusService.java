@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -38,9 +38,9 @@ import java.util.ArrayList;
  */
 public class BusService {
     
-    private final String serviceName;
-    private final String route;
-    private final ArrayList<Bus> buses;
+    private String serviceName;
+    private String route;
+    private ArrayList<Bus> buses;
     
     /**
      * Create a new instance of BusService. This is an immutable class.
@@ -52,6 +52,10 @@ public class BusService {
         if(serviceName == null || serviceName.length() == 0)
             throw new IllegalArgumentException("The service name must not be " +
                     "null or blank");
+        
+        if(route == null || route.length() == 0)
+            throw new IllegalArgumentException("The route must not be null " +
+                    "or blank.");
         
         this.serviceName = serviceName;
         this.route = route;
@@ -69,11 +73,10 @@ public class BusService {
     }
     
     /**
-     * Get the String which describes the route that this bus service takes. Can
-     * be null.
+     * Get the String which describes the route that this bus service takes.
      * 
      * @return  The String which describes the route that this bus service
-     * takes. Can be null.
+     * takes.
      */
     public String getRoute() {
         return route;

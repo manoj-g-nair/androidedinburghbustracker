@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -39,7 +39,7 @@ import uk.org.rivernile.android.bustracker.parser.livetimes.BusStop;
  */
 public class EdinburghBusStop extends BusStop {
     
-    private final boolean disruption;
+    private boolean disruption = false;
     
     /**
      * Create a new EdinburghBusStop instance.
@@ -62,7 +62,7 @@ public class EdinburghBusStop extends BusStop {
      * @return The list sorted by time.
      */
     public ArrayList<BusService> getSortedByTimeBusServices() {
-        final ArrayList<BusService> busServices = getBusServices();
+        ArrayList<BusService> busServices = getBusServices();
         Collections.sort(busServices, serviceComparator);
         return busServices;
     }
@@ -80,8 +80,8 @@ public class EdinburghBusStop extends BusStop {
             new Comparator<BusService>() {
         @Override
         public int compare(final BusService a, final BusService b) {
-            final EdinburghBus busA = (EdinburghBus)a.getFirstBus();
-            final EdinburghBus busB = (EdinburghBus)b.getFirstBus();
+            EdinburghBus busA = (EdinburghBus)a.getFirstBus();
+            EdinburghBus busB = (EdinburghBus)b.getFirstBus();
             
             if(busA == null || busB == null) return 0;
             

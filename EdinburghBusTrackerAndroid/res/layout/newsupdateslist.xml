@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2010 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2010 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,24 +25,22 @@
  *     exempt from clause 2.
 */ -->
 <LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
     android:orientation="vertical"
     android:padding="10dp"
     xmlns:android="http://schemas.android.com/apk/res/android">
     <TextView
         android:id="@+id/twitText"
-        android:layout_width="match_parent"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:autoLink="web|email|map"
-        android:textSize="16sp"
-        android:singleLine="false"
-        android:textIsSelectable="true" />
+        android:textSize="16dp"
+        android:singleLine="false" />
     <TextView
         android:id="@+id/twitInfo"
-        android:layout_width="match_parent"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:singleLine="true"
-        android:textSize="12sp"
-        android:textIsSelectable="true" />
+        android:textSize="12dp" />
 </LinearLayout>
