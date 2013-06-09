@@ -34,9 +34,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Random;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import uk.org.rivernile.edinburghbustracker.android.ApiKey;
 
 /**
  * This class fetches the latest updates from the Twitter list of the URL
@@ -52,9 +54,10 @@ public class FetchNewsUpdatesTask {
     public static final int ERROR_IOERR = 2;
     public static final int ERROR_URLERR = 3;
 
-    private final static String REQUEST_URL = "http://api.twitter.com/1/" +
-            "lists/statuses.json?slug=bus-tracker-updates&" +
-            "owner_screen_name=NiallScott&per_page=30";
+    private final static String REQUEST_URL = "http://edinb.us/api/" +
+            "TwitterStatuses?appName=MBE&key=";
+    
+    private static final Random random = new Random(System.currentTimeMillis());
 
     private static FetchNewsUpdatesTask instance = null;
     private NewsEvent handler;
@@ -171,8 +174,12 @@ public class FetchNewsUpdatesTask {
             final ArrayList<TwitterNewsItem> items =
                     new ArrayList<TwitterNewsItem>();
             
+            final StringBuilder urlBuilder = new StringBuilder(REQUEST_URL);
+            urlBuilder.append(ApiKey.getHashedKey());
+            urlBuilder.append("&random=").append(random.nextInt());
+            
             try {
-                URL u = new URL(REQUEST_URL);
+                URL u = new URL(urlBuilder.toString());
                 URLConnection con = u.openConnection();
                 BufferedReader in = new BufferedReader(new InputStreamReader(
                         con.getInputStream()));
