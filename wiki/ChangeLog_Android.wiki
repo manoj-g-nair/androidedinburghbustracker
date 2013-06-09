@@ -4,8 +4,8 @@
 = ChangeLog for the Android client application =
 
 === 2.1.1 ===
-* Changed the data source of the Twitter News feed because of the upcoming switch-off of the Twitter v1.0 API.
-* Fixed a bug in the generation of the API key.
+ * Changed the data source of the Twitter News feed because of the upcoming switch-off of the Twitter v1.0 API.
+ * Fixed a bug in the generation of the API key.
 
 === 2.1 ===
  * New feature: on certain devices on Android 2.2 (Froyo) or above, the application will automatically backup user settings and saved bus stops to Google Backup.
