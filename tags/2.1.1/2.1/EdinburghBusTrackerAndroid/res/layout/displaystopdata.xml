@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/*
+ * Copyright (C) 2009 - 2012 Niall 'Rivernile' Scott & Scott Straughan
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty.  In no event will the authors or contributors be held liable for
+ * any damages arising from the use of this software.
+ *
+ * The aforementioned copyright holder(s) hereby grant you a
+ * non-transferrable right to use this software for any purpose (including
+ * commercial applications), and to modify it and redistribute it, subject to
+ * the following conditions:
+ *
+ *  1. This notice may not be removed or altered from any file it appears in.
+ *
+ *  2. Any modifications made to this software, except those defined in
+ *     clause 3 of this agreement, must be released under this license, and
+ *     the source code of any modifications must be made available on a
+ *     publically accessible (and locateable) website, or sent to the
+ *     original author of this software.
+ *
+ *  3. Software modifications that do not alter the functionality of the
+ *     software but are simply adaptations to a specific environment are
+ *     exempt from clause 2.
+ */ -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:layout_gravity="center_horizontal"
+    android:gravity="center">
+    <LinearLayout
+        android:id="@+id/stopInfo"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:background="#D1D1D1">
+        <TextView
+            android:id="@+id/txtStopName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp" />
+        <TextView
+            android:id="@+id/txtServices"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp" />
+        <TextView
+            android:id="@+id/displayLastUpdated"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp" />
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="?android:attr/expandableListPreferredItemPaddingLeft"
+            android:paddingTop="8dp">
+            <TextView
+                android:id="@+id/txtService"
+                android:layout_height="wrap_content"
+                android:layout_width="50dp"
+                android:layout_alignParentLeft="true"
+                android:singleLine="true"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:text="@string/displaystopdata_column_service"/>
+            <TextView
+                android:id="@+id/txtDestination"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_toRightOf="@id/txtService"
+                android:singleLine="true"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:text="@string/displaystopdata_column_destination"/>
+            <TextView
+                android:id="@+id/txtTime"
+                android:layout_height="wrap_content"
+                android:layout_width="80dp"
+                android:layout_alignParentRight="true"
+                android:paddingRight="10dp"
+                android:gravity="right"
+                android:singleLine="true"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:text="@string/displaystopdata_column_due"/>
+        </RelativeLayout>
+    </LinearLayout>
+    <ExpandableListView
+        android:id="@id/android:list"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" />
+    <TextView
+        android:id="@id/android:empty"
+        android:layout_gravity="center_vertical"
+        android:padding="20dp"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/displaystopdata_empty"
+        android:gravity="center" />
+</LinearLayout>
