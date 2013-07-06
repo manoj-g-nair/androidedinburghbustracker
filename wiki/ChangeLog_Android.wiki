@@ -1,7 +1,43 @@
 #summary This document lists changes made to the Android application between releases.
 #labels Featured,ChangeLog
 
-= ChangeLog for the Android client application =
+= ChangeLog for the Android application =
+
+=== 2.2 ===
+ * Much of the app has been re-written with a move to using Fragments via the compatibility library. This re-write offered the chance of refactoring a lot of the code in the app, to make it cleaner and less prone to problems.
+ * strings.xml was modified to make use of proper String formatting and plural Strings.
+ * The ExpandableListView in DisplayStopDataFragment now remembers what groups have been expanded and contracted between configuration changes (such as screen rotation).
+ * The Google Maps for Android v2 library replaces the v1 library via the Google Play Services library. This brings a new Maps interface to the application, including vector maps.
+ * When a bus stop marker is tapped on the map, it no longer shows a Dialog. It now shows a bubble which which shows the stop name and services. Tapping on this bubble will show the user a bus stop details view.
+ * The bus stop search on the map view has been revamped, showing results in a suggestion list and on the map itself. The new search mechanism has also been made available to the system-wide search. Stop heading icons are shown next to the results in the suggestion list.
+ * The code has had much more documentation applied to it.
+ * URL request mismatches are now detected, for example if the user is unauthenticated on a public Wi-Fi hotspot. The application will show the user the appropriate error in this case.
+ * Added new database schema. This includes route lines for showing on the map and service colours. Some parts of the database inflation have had to be changed as an index needs to be created on the route lines table after it has been extracted from the application assets.
+ * Fixed an issue where old database journal files were not being deleted.
+ * The bus stop map will now show a coloured route line for a selected service, as well as the bus stops it stops at.
+ * DisplayStopDataFragment now shows service colours.
+ * Added new BusStopDetails view, which shows data on a particular bus stop, as well as showing a map and the distance and the direction from the device to the bus stop.
+ * Removed unused graphical assets, source code files and XML files from the project.
+ * The bus stop map now persists the centre point of the map so that location is returned to when the map is resumed.
+ * Star icons have been added to the favourite stops, the new bus stop details and DisplayStopDataActivity which allow the user to add or remove the stop as a favourite.
+ * The app checks for the availability of Google Play Service when it starts up. If it is not available, then it disables the map button and alerts the user that they cannot use map features. This is because the map depends on Google Play Services.
+ * Added new graphics assets - thanks to Anthony Totton.
+ * Reorganised application strings to make it easier to manage in the future and easier to localise.
+ * Some text labels in the application are not selectable so that text can be copied from them.
+ * Stop heading icons are shown in the nearest bus stops list.
+ * Better compliance with lint.
+ * Fixed an issue where the bus parser was being too strict and if unexpected data was received, the app would crash. The parsing code has now been made more robust.
+ * Fixed a bug where the time String formatter for the API key was not using UTC.
+ * Auto-refresh has been rewritten in BusStopDetailsFragment so that it is more in line with user expectations.
+ * Added Open Source licence DialogFragment inside the AboutFragment, as per the requirements of using the new Maps API.
+ * Updated to the latest version of the BugSense library.
+ * Removed text around progress indicators, as per the Android Design guidelines.
+ * Removed unnecessary items from context menus.
+ * Added locality information to DisplayStopDetailsFragment.
+ * Shortened titles of confirmation Dialogs so that the text is not truncated on some devices.
+ * Implemented proper ‘up’ navigation inside the application. This only applies to devices running Honeycomb and above.
+ * Added Intent actions on DisplayStopDataActivity and BusStopMapActivity so that other applications can use the features in those Activities. This is essentially the app providing an API to other applications on the device.
+ * Detecting the device location has now been improved.
 
 === 2.1.1 ===
  * Changed the data source of the Twitter News feed because of the upcoming switch-off of the Twitter v1.0 API.
