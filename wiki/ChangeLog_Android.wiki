@@ -3,6 +3,12 @@
 
 = ChangeLog for the Android application =
 
+=== 2.2.2 ===
+ * Split the bus stop database in to 900KB chunks. This is because Android 2.2 cannot deal with files in the application assets that are greater than 1MB in size. Written code to handle this and append these files in order on the device.
+ * Fixed NullPointerException in BusStopMapFragment and NearestStopsFragment where it was attempting to reference the ServicesChooserDialogFragment when it is null.
+ * If the bus times completes loading when the Fragment is no longer added to the Activity, then it is prevented from updating the UI. This is to prevent NullPointerExceptions when trying to reference the underlying Activity.
+ * Fixed an issue in FavouriteStopsActivity where the up navigation would take the user in an endless navigation loop if they had selected to show favourites when the application starts.
+
 === 2.2.1 ===
  * Cached the hit box size required for the star button as in certain cases, it would attempt to get this from an Activity that didn't exist, causing a NullPointerException.
  * In some cases, the bus stop database cannot be extracted properly (for example, insufficient disk space) and this means many items return null or empty sets, for example a null service listing. This causes problems later. Code has been added to disable access to the ServicesChooserDialogFragment if a list of services cannot be obtained.
