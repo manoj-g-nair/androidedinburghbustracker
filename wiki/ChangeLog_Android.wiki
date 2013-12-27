@@ -3,6 +3,33 @@
 
 = ChangeLog for the Android application =
 
+=== 2.2.3 ===
+ * Added a darker grey star for adding favourites as some users reported difficulty seeing the old graphic.
+ * Added the support ActionBar to the project.
+ * Added new xxhdpi app launcher icons.
+ * Removed support for ldpi density icons.
+ * Updated to the latest compatibility library.
+ * Updated to a new version of the Google Play Services library.
+ * Updated to the latest BugSense SDK.
+ * Changed SDK target to API level 19.
+ * Removed code that was targeted towards older platform versions than the minimum supported.
+ * Fixed a crash where references to IDs in the Android framework were being referenced incorrectly.
+ * Fixed a crash when the user had set a proximity alert and Google Play Services was not on the device, a crash would occur when the proximity notification is displayed.
+ * Fixed a crash where the progress DialogFragment being dismissed could cause an IllegalStateException warning about state loss.
+ * Fixed an OutOfMemoryException in BusStopDetailsFragment where the compass needle would continue to eat RAM as it was manipulated.
+ * Fixed an issue where the data that comes back from the external barcode scanning application could be null.
+ * Fixed an issue on platform versions prior to Ice Cream Sandwich in the map search suggestions where internal data could be exposed in the suggestions UI.
+ * The "My Location" ActionItem in the bus stop map has been replaced with the map-provided location button.
+ * The map search UI has been replaced with SearchView as an ActionView.
+ * The services filter on the map has been made more prominent.
+ * Added more rigorous checking around opening the bus stop database to prevent some crashes.
+ * Re-wrote the services chooser DialogFragment so that more than 1 service could be selected by default, and removed dependency on hosting Fragments to retain their instance.
+ * Removed code that was targeted towards older versions of Android than this app will run on.
+ * Cleaned up code in DialogFragments.
+ * Refactored Activities and Fragments so that all navigation code is hosted in Activities. This will potentially fix a few crashes seen in the wild. It will also mean for a future tablet version being easier to write.
+ * Moved some source code in to XML where possible to let the Android system handle certain tasks.
+ * If an Activity hosts a Fragment which does not require parameters, then the layout for that Activity has been moved out to a XML file rather than being done in code.
+
 === 2.2.2 ===
  * Split the bus stop database in to 900KB chunks. This is because Android 2.2 cannot deal with files in the application assets that are greater than 1MB in size. Written code to handle this and append these files in order on the device.
  * Fixed NullPointerException in BusStopMapFragment and NearestStopsFragment where it was attempting to reference the ServicesChooserDialogFragment when it is null.
